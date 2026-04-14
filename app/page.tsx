@@ -1,9 +1,15 @@
 import Link from 'next/link';
 import db from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 async function getStats() {
-  const { rows } = await db.query('SELECT COUNT(*) AS total FROM dbo.quiz');
-  return { total: rows[0]?.total ?? 0 };
+  try {
+    const { rows } = await db.query('SELECT COUNT(*) AS total FROM dbo.quiz');
+    return { total: rows[0]?.total ?? 0 };
+  } catch {
+    return { total: 0 };
+  }
 }
 
 export default async function HomePage() {
