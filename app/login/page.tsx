@@ -1,6 +1,10 @@
-import LoginForm from '@/components/LoginForm';
+export default function LoginPage({ searchParams }: { searchParams: { error?: string } }) {
+  const errorMsg =
+    searchParams.error === 'oauth' ? '로그인 중 오류가 발생했습니다.' :
+    searchParams.error === 'invalid' ? '잘못된 접근입니다.' :
+    searchParams.error === 'token' ? '인증 처리 중 오류가 발생했습니다.' :
+    searchParams.error === 'userinfo' ? '사용자 정보를 가져오지 못했습니다.' : null;
 
-export default function LoginPage() {
   return (
     <div style={{ maxWidth: 440, margin: '4rem auto', padding: '0 1.5rem' }}>
       <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
@@ -8,7 +12,37 @@ export default function LoginPage() {
         <h1 style={{ fontSize: '1.75rem', fontWeight: 900, marginBottom: '0.5rem' }}>가톨릭 퀴즈</h1>
         <p style={{ color: 'var(--text-muted)' }}>로그인하면 점수가 랭킹에 기록됩니다</p>
       </div>
-      <LoginForm />
+
+      <div className="game-card" style={{ padding: '2rem' }}>
+        {errorMsg && (
+          <div style={{
+            background: 'rgba(233,69,96,0.1)', border: '1px solid rgba(233,69,96,0.4)',
+            borderRadius: 8, padding: '0.75rem 1rem', color: '#e94560',
+            fontSize: '0.9rem', marginBottom: '1.25rem', textAlign: 'center',
+          }}>
+            {errorMsg}
+          </div>
+        )}
+
+        <a href="/api/auth/goodnews" style={{ textDecoration: 'none', display: 'block' }}>
+          <button className="btn-primary" style={{
+            width: '100%', padding: '0.875rem', fontSize: '1rem',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+          }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+              <polyline points="10 17 15 12 10 7"/>
+              <line x1="15" y1="12" x2="3" y2="12"/>
+            </svg>
+            굿뉴스 계정으로 로그인
+          </button>
+        </a>
+
+        <p style={{ textAlign: 'center', marginTop: '1.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+          로그인 없이도 게임은 즐길 수 있지만,{' '}
+          <strong style={{ color: 'var(--accent)' }}>랭킹 등록</strong>은 로그인이 필요해요.
+        </p>
+      </div>
     </div>
   );
 }

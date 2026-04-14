@@ -50,9 +50,9 @@ export default function NavBar({ session }: { session: Session | null }) {
               </button>
             </div>
           ) : (
-            <Link href="/login" style={{ textDecoration: 'none' }}>
+            <a href="/api/auth/goodnews" style={{ textDecoration: 'none' }}>
               <button className="btn-primary" style={{ padding: '0.4rem 1.2rem', fontSize: '0.875rem' }}>로그인</button>
-            </Link>
+            </a>
           )}
         </div>
       </div>
