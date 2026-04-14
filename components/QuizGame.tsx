@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -172,7 +172,7 @@ export default function QuizGame() {
   if (!currentQ) return null;
 
   const progress = ((currentIdx) / questions.length) * 100;
-  const choices = getChoices(currentQ);
+  const choices = useMemo(() => currentQ ? getChoices(currentQ) : [], [currentIdx]); // eslint-disable-line react-hooks/exhaustive-deps
   const isOXQuestion = currentQ.right_word === 'O' || currentQ.right_word === 'X';
 
   return (
