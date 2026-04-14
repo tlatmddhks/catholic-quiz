@@ -146,13 +146,13 @@ export default function QuizGame() {
     }).catch(() => {});
   }
 
-  // 보기 섞기 (OX 제외)
-  function getChoices(q: Question): string[] {
-    if (q.right_word === 'O' || q.right_word === 'X') return ['O', 'X'];
+  // 보기 섞기 - currentIdx 바뀔 때만 재계산 (hooks는 조건부 return 전에)
+  const choices = useMemo(() => {
+    const q = questions[currentIdx];
+    if (!q || q.right_word === 'O' || q.right_word === 'X') return ['O', 'X'];
     const wrong = q.wrong_words.slice(0, 3);
-    const all = [q.right_word, ...wrong].sort(() => Math.random() - 0.5);
-    return all;
-  }
+    return [q.right_word, ...wrong].sort(() => Math.random() - 0.5);
+  }, [currentIdx, questions]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (gameState === 'loading') {
     return (
@@ -172,7 +172,6 @@ export default function QuizGame() {
   if (!currentQ) return null;
 
   const progress = ((currentIdx) / questions.length) * 100;
-  const choices = useMemo(() => currentQ ? getChoices(currentQ) : [], [currentIdx]); // eslint-disable-line react-hooks/exhaustive-deps
   const isOXQuestion = currentQ.right_word === 'O' || currentQ.right_word === 'X';
 
   return (
