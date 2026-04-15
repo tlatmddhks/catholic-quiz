@@ -27,7 +27,6 @@ export async function GET(req: NextRequest) {
   }
 
   // 토큰 교환 (token_endpoint_auth_method: 'none' → client_secret 미포함)
-  const base = process.env.APP_URL!;
   const tokenRes = await fetch(TOKEN_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
