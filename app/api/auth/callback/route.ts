@@ -7,25 +7,23 @@ export const runtime = 'nodejs';
 const TOKEN_URL = 'https://auth.catholic.or.kr/oauth/token';
 const USERINFO_URL = 'https://auth.catholic.or.kr/oauth/userinfo';
 
-function redirect(req: NextRequest, path: string) {
-  return NextResponse.redirect(new URL(path, req.url));
-}
-
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const code = searchParams.get('code');
   const state = searchParams.get('state');
   const error = searchParams.get('error');
 
+  const base = process.env.APP_URL!;
+
   if (error || !code || !state) {
-    return redirect(req, '/login?error=oauth');
+    return NextResponse.redirect(`${base}/login?error=oauth`);
   }
 
   const cookieState = req.cookies.get('oauth_state')?.value;
   const codeVerifier = req.cookies.get('oauth_verifier')?.value;
 
   if (state !== cookieState || !codeVerifier) {
-    return redirect(req, '/login?error=invalid');
+    return NextResponse.redirect(`${base}/login?error=invalid`);
   }
 
   // 토큰 교환 (token_endpoint_auth_method: 'none' → client_secret 미포함)
@@ -44,7 +42,7 @@ export async function GET(req: NextRequest) {
 
   if (!tokenRes.ok) {
     console.error('Token exchange failed:', await tokenRes.text());
-    return redirect(req, '/login?error=token');
+    return NextResponse.redirect(`${base}/login?error=token`);
   }
 
   const { access_token } = await tokenRes.json();
@@ -56,7 +54,7 @@ export async function GET(req: NextRequest) {
 
   if (!userInfoRes.ok) {
     console.error('Userinfo failed:', await userInfoRes.text());
-    return redirect(req, '/login?error=userinfo');
+    return NextResponse.redirect(`${base}/login?error=userinfo`);
   }
 
   const userInfo = await userInfoRes.json();
@@ -85,7 +83,7 @@ export async function GET(req: NextRequest) {
 
   // 세션 생성
   const sessionId = await createSession(userId);
-  const res = redirect(req, '/');
+  const res = NextResponse.redirect(base);
   res.cookies.set('qsession', sessionId, { httpOnly: true, maxAge: 60 * 60 * 24 * 7, path: '/' });
   res.cookies.delete('oauth_state');
   res.cookies.delete('oauth_verifier');
