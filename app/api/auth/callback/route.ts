@@ -5,7 +5,7 @@ import { createSession } from '@/lib/auth';
 export const runtime = 'nodejs';
 
 const TOKEN_URL = 'https://auth.catholic.or.kr/oauth/token';
-const USERINFO_URL = 'https://auth.catholic.or.kr/oauth/userinfo'; // fallback (POST)
+const USERINFO_URL = 'https://auth.catholic.or.kr/oauth/me';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -45,33 +45,20 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${base}/login?error=token`);
   }
 
-  const tokenData = await tokenRes.json();
-  const { access_token, id_token } = tokenData;
+  const { access_token } = await tokenRes.json();
 
-  // id_token(JWT)에서 사용자 정보 추출
-  let sub: string;
-  let nickname: string;
-
-  if (id_token) {
-    const payload = JSON.parse(Buffer.from(id_token.split('.')[1], 'base64url').toString());
-    console.log('[id_token payload]', JSON.stringify(payload));
-    sub = payload.sub;
-    nickname = payload.name || payload.nickname || payload.preferred_username || sub;
-  } else {
-    // id_token 없으면 userinfo 엔드포인트 시도
-    const userInfoRes = await fetch(USERINFO_URL, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/x-www-form-urlencoded' },
-    });
-    if (!userInfoRes.ok) {
-      console.error('Userinfo failed:', await userInfoRes.text());
-      return NextResponse.redirect(`${base}/login?error=userinfo`);
-    }
-    const userInfo = await userInfoRes.json();
-    sub = userInfo.sub;
-    nickname = userInfo.name || userInfo.nickname || userInfo.preferred_username || sub;
+  // 사용자 정보 조회 (/oauth/me)
+  const userInfoRes = await fetch(USERINFO_URL, {
+    headers: { Authorization: `Bearer ${access_token}` },
+  });
+  if (!userInfoRes.ok) {
+    console.error('Userinfo failed:', await userInfoRes.text());
+    return NextResponse.redirect(`${base}/login?error=userinfo`);
   }
+  const u = await userInfoRes.json();
+  const sub: string = u.sub;
   const username = `goodnews:${sub}`;
+  const nickname: string = u.name || sub;
 
   // 사용자 upsert
   const { rows: existing } = await db.query(
@@ -82,13 +69,26 @@ export async function GET(req: NextRequest) {
   let userId: number;
   if (existing.length > 0) {
     userId = existing[0].user_id;
-    await db.query('UPDATE dbo.quiz_user SET nickname = @p1 WHERE user_id = @p2', [nickname, userId]);
+    await db.query(
+      `UPDATE dbo.quiz_user SET
+         nickname=@p1, name=@p2, christen=@p3, chukmonth=@p4, chukday=@p5,
+         email=@p6, phone_number=@p7, parish=@p8, church=@p9, gyogu_code=@p10, bon_cd=@p11
+       WHERE user_id=@p12`,
+      [nickname, u.name||null, u.christen||null, u.chukmonth||null, u.chukday||null,
+       u.email||null, u.phone_number||null, u.parish||null, u.church||null, u.gyogu_code||null, u.bon_cd||null,
+       userId]
+    );
   } else {
     const { rows: maxRows } = await db.query('SELECT ISNULL(MAX(user_id),0)+1 AS next_id FROM dbo.quiz_user');
     userId = maxRows[0].next_id;
     await db.query(
-      'INSERT INTO dbo.quiz_user (user_id, username, password_hash, nickname, created_at) VALUES (@p1,@p2,@p3,@p4,GETDATE())',
-      [userId, username, 'GOODNEWS_OAUTH', nickname]
+      `INSERT INTO dbo.quiz_user
+         (user_id, username, password_hash, nickname, name, christen, chukmonth, chukday,
+          email, phone_number, parish, church, gyogu_code, bon_cd, created_at)
+       VALUES (@p1,@p2,@p3,@p4,@p5,@p6,@p7,@p8,@p9,@p10,@p11,@p12,@p13,@p14,GETDATE())`,
+      [userId, username, 'GOODNEWS_OAUTH', nickname, u.name||null, u.christen||null,
+       u.chukmonth||null, u.chukday||null, u.email||null, u.phone_number||null,
+       u.parish||null, u.church||null, u.gyogu_code||null, u.bon_cd||null]
     );
   }
 
