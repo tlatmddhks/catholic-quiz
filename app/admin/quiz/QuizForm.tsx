@@ -31,7 +31,7 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
 
   const [mode, setMode] = useState<QuizMode>(initial ? detectMode() : 'ox');
   const [form, setForm] = useState({
-    area: initial?.area ? String(initial.area) : '0',
+    area: initial?.area ? String(initial.area) : '1',
     lv: initial?.lv || 1,
     pt: initial?.pt || 50,
     question: initial?.question || '',
