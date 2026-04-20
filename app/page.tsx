@@ -41,15 +41,14 @@ export default async function HomePage() {
       {/* 공지사항 배너 */}
       {notice && (
         <div style={{
-          background: 'rgba(233,69,96,0.08)', border: '1px solid rgba(233,69,96,0.3)',
-          borderRadius: 12, padding: '0.9rem 1.25rem', marginBottom: '2rem',
-          display: 'flex', gap: '0.75rem', alignItems: 'flex-start',
+          background: 'rgba(233,69,96,0.08)', border: '1px solid rgba(233,69,96,0.35)',
+          borderRadius: 16, padding: '1.5rem 1.75rem', marginBottom: '2.5rem',
         }}>
-          <span style={{ fontSize: '1rem', flexShrink: 0 }}>📢</span>
-          <div>
-            <strong style={{ color: '#e94560', fontSize: '0.875rem' }}>{notice.title}</strong>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: 4, whiteSpace: 'pre-wrap' }}>{notice.content}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+            <span style={{ fontSize: '1.5rem' }}>📢</span>
+            <strong style={{ color: '#e94560', fontSize: '1.15rem', fontWeight: 800 }}>{notice.title}</strong>
           </div>
+          <p style={{ color: 'var(--text)', fontSize: '1rem', lineHeight: 1.8, whiteSpace: 'pre-wrap', margin: 0 }}>{notice.content}</p>
         </div>
       )}
 
