@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ALL_MENUS, type MenuKey } from '@/lib/admin';
+import { ALL_MENUS, type MenuKey } from '@/lib/permissions';
 
 const MENU_HREF: Record<MenuKey, string> = {
   quiz:     '/admin/quiz',

@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { ALL_MENUS, type MenuKey } from '@/lib/admin';
+import { ALL_MENUS, type MenuKey } from '@/lib/permissions';
 
 interface Admin {
   username: string;
