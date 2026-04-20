@@ -41,7 +41,7 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
     wrong3: initial?.wrong_word?.split('/')[2] || '',
     explain_word: initial?.explain_word || '',
     survival_yn: initial?.survival_yn === 'Y',
-    is_visible: initial?.is_visible !== 'N',
+    is_visible: initial?.is_visible === 'Y',
     is_test: initial?.is_test === 'Y',
   });
   const [loading, setLoading] = useState(false);
