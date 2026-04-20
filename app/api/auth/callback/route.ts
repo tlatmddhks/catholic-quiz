@@ -5,7 +5,7 @@ import { createSession } from '@/lib/auth';
 export const runtime = 'nodejs';
 
 const TOKEN_URL = 'https://auth.catholic.or.kr/oauth/token';
-const USERINFO_URL = 'https://auth.catholic.or.kr/oauth/userinfo';
+const USERINFO_URL = 'https://auth.catholic.or.kr/oauth/userinfo'; // fallback (POST)
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -45,21 +45,31 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${base}/login?error=token`);
   }
 
-  const { access_token } = await tokenRes.json();
+  const tokenData = await tokenRes.json();
+  const { access_token, id_token } = tokenData;
 
-  // 사용자 정보 조회
-  const userInfoRes = await fetch(USERINFO_URL, {
-    headers: { Authorization: `Bearer ${access_token}` },
-  });
+  // id_token(JWT)에서 사용자 정보 추출
+  let sub: string;
+  let nickname: string;
 
-  if (!userInfoRes.ok) {
-    console.error('Userinfo failed:', await userInfoRes.text());
-    return NextResponse.redirect(`${base}/login?error=userinfo`);
+  if (id_token) {
+    const payload = JSON.parse(Buffer.from(id_token.split('.')[1], 'base64url').toString());
+    sub = payload.sub;
+    nickname = payload.name || payload.nickname || payload.preferred_username || sub;
+  } else {
+    // id_token 없으면 userinfo 엔드포인트 시도
+    const userInfoRes = await fetch(USERINFO_URL, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
+    if (!userInfoRes.ok) {
+      console.error('Userinfo failed:', await userInfoRes.text());
+      return NextResponse.redirect(`${base}/login?error=userinfo`);
+    }
+    const userInfo = await userInfoRes.json();
+    sub = userInfo.sub;
+    nickname = userInfo.name || userInfo.nickname || userInfo.preferred_username || sub;
   }
-
-  const userInfo = await userInfoRes.json();
-  const sub: string = userInfo.sub;
-  const nickname: string = userInfo.name || userInfo.nickname || userInfo.preferred_username || sub;
   const username = `goodnews:${sub}`;
 
   // 사용자 upsert
