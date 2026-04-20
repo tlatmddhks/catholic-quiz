@@ -130,6 +130,33 @@ export default function QuizGame() {
     }, 1800);
   }, [answerState, currentQ, currentIdx, questions, lives, isSurvival, score, correctCount, totalTime]);
 
+  function restartGame() {
+    setGameState('loading');
+    setQuestions([]);
+    setCurrentIdx(0);
+    setScore(0);
+    setCorrectCount(0);
+    setLives(SURVIVAL_LIVES);
+    setAnswerState('idle');
+    setSelectedAnswer(null);
+    setSelectedTiles([]);
+    setUsedTileIds(new Set());
+    setTimeLeft(20);
+    setTotalTime(0);
+    setHistory([]);
+    setFloatScore(null);
+    const url = `/api/quiz?mode=${mode}${lv ? `&lv=${lv}` : ''}&count=${QUESTIONS_PER_GAME}`;
+    fetch(url).then(r => r.json()).then(data => {
+      if (data.questions?.length > 0) {
+        setQuestions(data.questions);
+        setGameState('playing');
+      } else {
+        alert('문제를 불러오지 못했습니다.');
+        router.push('/');
+      }
+    }).catch(() => { alert('문제 로드 실패'); router.push('/'); });
+  }
+
   async function saveResult(finalScore: number, finalCorrect: number, finalTime: number) {
     await fetch('/api/result', {
       method: 'POST',
@@ -173,7 +200,7 @@ export default function QuizGame() {
   }
 
   if (gameState === 'result') {
-    return <ResultScreen history={history} score={score} mode={mode} lv={lv} totalTime={totalTime} questions={questions} />;
+    return <ResultScreen history={history} score={score} mode={mode} lv={lv} totalTime={totalTime} questions={questions} onRetry={restartGame} />;
   }
 
   if (!currentQ) return null;
@@ -402,9 +429,10 @@ export default function QuizGame() {
   );
 }
 
-function ResultScreen({ history, score, mode, lv, totalTime, questions }: {
+function ResultScreen({ history, score, mode, lv, totalTime, questions, onRetry }: {
   history: {q: Question; chosen: string; correct: boolean}[];
   score: number; mode: string; lv: string; totalTime: number; questions: Question[];
+  onRetry: () => void;
 }) {
   const correct = history.filter(h => h.correct).length;
   const accuracy = Math.round((correct / (history.length || 1)) * 100);
@@ -466,9 +494,7 @@ function ResultScreen({ history, score, mode, lv, totalTime, questions }: {
       </div>
 
       <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-        <Link href={`/play?mode=${mode}${lv ? `&lv=${lv}` : ''}`} style={{ textDecoration: 'none' }}>
-          <button className="btn-primary">🔄 다시 도전</button>
-        </Link>
+        <button className="btn-primary" onClick={onRetry}>🔄 다시 도전</button>
         <Link href="/ranking" style={{ textDecoration: 'none' }}>
           <button className="btn-secondary">🏆 랭킹 보기</button>
         </Link>
