@@ -10,7 +10,7 @@ interface Question {
 }
 
 const MODE_LABELS: Record<string, string> = {
-  ox: 'OX 퀴즈', chosung: '초성 퀴즈', survival: '서바이벌', random: '랜덤 퀴즈',
+  ox: 'OX 퀴즈', chosung: '셔플 퀴즈', normal: '일반 퀴즈', survival: '서바이벌', random: '랜덤 퀴즈',
 };
 const LV_LABELS: Record<number, string> = { 1:'입문',2:'초급',3:'중급',4:'고급',5:'전문',6:'마스터',7:'레전드' };
 const QUESTIONS_PER_GAME = 10;
@@ -33,7 +33,8 @@ export default function QuizGame() {
   const [lives, setLives] = useState(SURVIVAL_LIVES);
   const [answerState, setAnswerState] = useState<AnswerState>('idle');
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-  const [chosungInput, setChosungInput] = useState('');
+  const [selectedTiles, setSelectedTiles] = useState<{char: string; id: number}[]>([]);
+  const [usedTileIds, setUsedTileIds] = useState<Set<number>>(new Set());
   const [timeLeft, setTimeLeft] = useState(20);
   const [totalTime, setTotalTime] = useState(0);
   const [history, setHistory] = useState<{q: Question; chosen: string; correct: boolean}[]>([]);
@@ -41,12 +42,11 @@ export default function QuizGame() {
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const totalTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const currentQ = questions[currentIdx];
   const isSurvival = mode === 'survival';
   const isOX = mode === 'ox' || (mode !== 'chosung' && mode !== 'survival' && currentQ?.type === 1 && (currentQ?.right_word === 'O' || currentQ?.right_word === 'X'));
-  const isCho = mode === 'chosung' || currentQ?.type === 3;
+  const isShuffle = mode === 'chosung';
 
   // 문제 로드
   useEffect(() => {
@@ -89,12 +89,6 @@ export default function QuizGame() {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [currentIdx, gameState, answerState]);
 
-  // 초성 모드 자동 포커스
-  useEffect(() => {
-    if (isCho && answerState === 'idle' && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [currentIdx, isCho, answerState]);
 
   const handleAnswer = useCallback((chosen: string) => {
     if (answerState !== 'idle' || !currentQ) return;
@@ -129,7 +123,8 @@ export default function QuizGame() {
         setCurrentIdx(nextIdx);
         setAnswerState('idle');
         setSelectedAnswer(null);
-        setChosungInput('');
+        setSelectedTiles([]);
+        setUsedTileIds(new Set());
       }
     }, 1800);
   }, [answerState, currentQ, currentIdx, questions, lives, isSurvival, score, correctCount, totalTime]);
@@ -146,12 +141,23 @@ export default function QuizGame() {
     }).catch(() => {});
   }
 
-  // 보기 섞기 - currentIdx 바뀔 때만 재계산 (hooks는 조건부 return 전에)
+  // 4지선다 보기
   const choices = useMemo(() => {
     const q = questions[currentIdx];
     if (!q || q.right_word === 'O' || q.right_word === 'X') return ['O', 'X'];
     const wrong = q.wrong_words.slice(0, 3);
     return [q.right_word, ...wrong].sort(() => Math.random() - 0.5);
+  }, [currentIdx, questions]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 셔플 퀴즈 글자 타일 (right_word 각 글자 + wrong_words 각 글자)
+  const shuffleTiles = useMemo(() => {
+    const q = questions[currentIdx];
+    if (!q) return [];
+    const rightChars = q.right_word.split('');
+    const wrongChars = q.wrong_words.flatMap(w => w.split(''));
+    return [...rightChars, ...wrongChars]
+      .map((char, i) => ({ char, id: i }))
+      .sort(() => Math.random() - 0.5);
   }, [currentIdx, questions]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (gameState === 'loading') {
@@ -247,35 +253,80 @@ export default function QuizGame() {
             );
           })}
         </div>
-      ) : isCho ? (
-        /* 초성 입력 */
+      ) : isShuffle ? (
+        /* 셔플 퀴즈 - 글자 타일 선택 조합 */
         <div style={{ marginBottom: '1.5rem' }}>
-          {/* 초성 힌트 표시 */}
-          <div style={{ marginBottom: '1rem', textAlign: 'center' }}>
-            <span style={{ fontSize: '2rem', letterSpacing: '0.5rem', color: 'var(--accent)', fontWeight: 900 }}>
-              {currentQ.right_word.split('').map((_, i) => currentQ.wrong_words[0]?.split('/')[i] || '?').join(' ')}
-            </span>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.5rem' }}>힌트: {currentQ.wrong_words[0] || '?'}</p>
+          {/* 정답 길이 힌트 */}
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'center', marginBottom: '0.75rem' }}>
+            정답 글자 수: <strong style={{ color: 'var(--accent)' }}>{currentQ.right_word.length}글자</strong>
+          </p>
+          {/* 선택된 글자 조합 영역 */}
+          <div style={{
+            minHeight: 64, background: 'rgba(255,255,255,0.04)', border: '2px dashed var(--border)',
+            borderRadius: 14, padding: '0.75rem 1rem', marginBottom: '1rem',
+            display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center',
+          }}>
+            {selectedTiles.length === 0
+              ? <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>아래 글자를 클릭해서 정답을 만드세요</span>
+              : selectedTiles.map((t, i) => (
+                <span key={i} style={{
+                  background: 'var(--accent)', color: '#000', fontWeight: 900,
+                  fontSize: '1.3rem', width: 46, height: 46, borderRadius: 10,
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  {t.char}
+                </span>
+              ))
+            }
           </div>
-          <form onSubmit={(e) => { e.preventDefault(); handleAnswer(chosungInput); }}>
-            <input
-              ref={inputRef}
-              className="chosung-input"
-              value={chosungInput}
-              onChange={e => setChosungInput(e.target.value)}
-              disabled={answerState !== 'idle'}
-              placeholder="정답을 입력하세요"
-              autoComplete="off"
-            />
+          {/* 글자 타일 */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '1rem', justifyContent: 'center' }}>
+            {shuffleTiles.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => {
+                  if (usedTileIds.has(t.id) || answerState !== 'idle') return;
+                  setSelectedTiles(prev => [...prev, t]);
+                  setUsedTileIds(prev => { const s = new Set(prev); s.add(t.id); return s; });
+                }}
+                disabled={usedTileIds.has(t.id) || answerState !== 'idle'}
+                style={{
+                  width: 50, height: 50, borderRadius: 10, fontWeight: 800, fontSize: '1.2rem',
+                  border: `2px solid ${usedTileIds.has(t.id) ? 'transparent' : 'var(--border)'}`,
+                  background: usedTileIds.has(t.id) ? 'rgba(255,255,255,0.02)' : 'var(--card2)',
+                  color: usedTileIds.has(t.id) ? 'transparent' : 'var(--text)',
+                  cursor: usedTileIds.has(t.id) ? 'default' : 'pointer',
+                  transition: 'all 0.15s',
+                }}
+              >
+                {t.char}
+              </button>
+            ))}
+          </div>
+          {/* 지우기 / 제출 */}
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
             <button
-              type="submit"
+              className="btn-secondary"
+              style={{ flex: 1 }}
+              onClick={() => {
+                if (selectedTiles.length === 0) return;
+                const last = selectedTiles[selectedTiles.length - 1];
+                setSelectedTiles(prev => prev.slice(0, -1));
+                setUsedTileIds(prev => { const s = new Set(prev); s.delete(last.id); return s; });
+              }}
+              disabled={answerState !== 'idle' || selectedTiles.length === 0}
+            >
+              ← 지우기
+            </button>
+            <button
               className="btn-primary"
-              style={{ width: '100%', marginTop: '0.75rem', padding: '0.875rem' }}
-              disabled={answerState !== 'idle' || !chosungInput.trim()}
+              style={{ flex: 2, padding: '0.875rem' }}
+              onClick={() => handleAnswer(selectedTiles.map(t => t.char).join(''))}
+              disabled={answerState !== 'idle' || selectedTiles.length === 0}
             >
               제출
             </button>
-          </form>
+          </div>
         </div>
       ) : (
         /* 4지선다 */
