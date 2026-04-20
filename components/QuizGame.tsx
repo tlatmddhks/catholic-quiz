@@ -254,30 +254,35 @@ export default function QuizGame() {
           })}
         </div>
       ) : isShuffle ? (
-        /* 셔플 퀴즈 - 글자 타일 선택 조합 */
+        /* 셔플 퀴즈 - 빈칸 채우기 */
         <div style={{ marginBottom: '1.5rem' }}>
-          {/* 정답 길이 힌트 */}
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'center', marginBottom: '0.75rem' }}>
-            정답 글자 수: <strong style={{ color: 'var(--accent)' }}>{currentQ.right_word.length}글자</strong>
-          </p>
-          {/* 선택된 글자 조합 영역 */}
-          <div style={{
-            minHeight: 64, background: 'rgba(255,255,255,0.04)', border: '2px dashed var(--border)',
-            borderRadius: 14, padding: '0.75rem 1rem', marginBottom: '1rem',
-            display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center',
-          }}>
-            {selectedTiles.length === 0
-              ? <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>아래 글자를 클릭해서 정답을 만드세요</span>
-              : selectedTiles.map((t, i) => (
-                <span key={i} style={{
-                  background: 'var(--accent)', color: '#000', fontWeight: 900,
-                  fontSize: '1.3rem', width: 46, height: 46, borderRadius: 10,
-                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          {/* 정답 빈칸 박스 */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+            {Array.from({ length: currentQ.right_word.length }).map((_, i) => {
+              const filled = selectedTiles[i];
+              const isAnswered = answerState !== 'idle';
+              const correctChar = currentQ.right_word[i];
+              let boxBg = filled ? 'var(--accent)' : 'rgba(255,255,255,0.04)';
+              let boxBorder = filled ? 'var(--accent)' : 'var(--border)';
+              let boxColor = filled ? '#000' : 'transparent';
+              if (isAnswered) {
+                boxBg = answerState === 'correct' ? 'rgba(34,197,94,0.3)' : filled?.char === correctChar ? 'rgba(34,197,94,0.3)' : 'rgba(233,69,96,0.3)';
+                boxBorder = answerState === 'correct' ? '#22c55e' : filled?.char === correctChar ? '#22c55e' : '#e94560';
+                boxColor = 'var(--text)';
+              }
+              return (
+                <div key={i} style={{
+                  width: 52, height: 52, borderRadius: 10,
+                  border: `2px solid ${boxBorder}`,
+                  background: boxBg,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontWeight: 900, fontSize: '1.3rem', color: boxColor,
+                  transition: 'all 0.2s',
                 }}>
-                  {t.char}
-                </span>
-              ))
-            }
+                  {filled?.char || ''}
+                </div>
+              );
+            })}
           </div>
           {/* 글자 타일 */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '1rem', justifyContent: 'center' }}>
@@ -285,7 +290,7 @@ export default function QuizGame() {
               <button
                 key={t.id}
                 onClick={() => {
-                  if (usedTileIds.has(t.id) || answerState !== 'idle') return;
+                  if (usedTileIds.has(t.id) || answerState !== 'idle' || selectedTiles.length >= currentQ.right_word.length) return;
                   setSelectedTiles(prev => [...prev, t]);
                   setUsedTileIds(prev => { const s = new Set(prev); s.add(t.id); return s; });
                 }}
@@ -322,7 +327,7 @@ export default function QuizGame() {
               className="btn-primary"
               style={{ flex: 2, padding: '0.875rem' }}
               onClick={() => handleAnswer(selectedTiles.map(t => t.char).join(''))}
-              disabled={answerState !== 'idle' || selectedTiles.length === 0}
+              disabled={answerState !== 'idle' || selectedTiles.length !== currentQ.right_word.length}
             >
               제출
             </button>
