@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import db from '@/lib/db';
+import { getSession } from '@/lib/auth';
+import { checkIsAdmin } from '@/lib/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,6 +22,8 @@ async function getStats() {
 
 export default async function HomePage() {
   const { total, notice } = await getStats();
+  const session = await getSession().catch(() => null);
+  const isAdmin = session ? await checkIsAdmin(session.username).catch(() => false) : false;
 
 
   const levels = [
@@ -140,13 +144,20 @@ export default async function HomePage() {
       </div>
 
       {/* 하단 */}
-      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
         <Link href="/ranking" style={{ textDecoration: 'none' }}>
           <button className="btn-secondary">🏆 랭킹 보기</button>
         </Link>
         <Link href="/play?mode=random" style={{ textDecoration: 'none' }}>
           <button className="btn-primary">바로 시작하기 →</button>
         </Link>
+        {isAdmin && (
+          <Link href="/play?mode=test" style={{ textDecoration: 'none' }}>
+            <button className="btn-secondary" style={{ color: '#f5a623', borderColor: 'rgba(245,166,35,0.4)' }}>
+              🧪 테스트 문제 풀기
+            </button>
+          </Link>
+        )}
       </div>
     </div>
   );

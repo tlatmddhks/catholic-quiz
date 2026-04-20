@@ -8,6 +8,7 @@ interface QuizData {
   id?: number; area?: string; lv?: number; pt?: number; type?: number;
   question?: string; right_word?: string; wrong_word?: string; explain_word?: string;
   ox?: string; shuffle?: string; survival_yn?: string; normal?: string;
+  is_visible?: string; is_test?: string;
 }
 
 const inputStyle: React.CSSProperties = {
@@ -40,6 +41,8 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
     wrong3: initial?.wrong_word?.split('/')[2] || '',
     explain_word: initial?.explain_word || '',
     survival_yn: initial?.survival_yn === 'Y',
+    is_visible: initial?.is_visible !== 'N',
+    is_test: initial?.is_test === 'Y',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -75,6 +78,8 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
       shuffle: mode === 'chosung' ? 'Y' : 'N',
       survival_yn: form.survival_yn ? 'Y' : 'N',
       normal: mode === 'normal' ? 'Y' : 'N',
+      is_visible: form.is_visible ? 'Y' : 'N',
+      is_test: form.is_test ? 'Y' : 'N',
     };
 
     const url = isEdit ? `/api/admin/quiz/${initial!.id}` : '/api/admin/quiz';
@@ -182,10 +187,20 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
           value={form.explain_word} onChange={e => set('explain_word', e.target.value)} placeholder="정답 해설" />
       </div>
 
-      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text)', fontSize: '0.875rem', marginBottom: '1.5rem', cursor: 'pointer' }}>
-        <input type="checkbox" checked={form.survival_yn} onChange={e => set('survival_yn', e.target.checked)} />
-        서바이벌 모드에 포함
-      </label>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.5rem' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text)', fontSize: '0.875rem', cursor: 'pointer' }}>
+          <input type="checkbox" checked={form.survival_yn} onChange={e => set('survival_yn', e.target.checked)} />
+          서바이벌 모드에 포함
+        </label>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text)', fontSize: '0.875rem', cursor: 'pointer' }}>
+          <input type="checkbox" checked={form.is_visible} onChange={e => set('is_visible', e.target.checked)} />
+          노출 여부 <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>(체크 해제 시 플레이어에게 노출 안 됨)</span>
+        </label>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text)', fontSize: '0.875rem', cursor: 'pointer' }}>
+          <input type="checkbox" checked={form.is_test} onChange={e => set('is_test', e.target.checked)} />
+          테스트 문제 <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>(관리자 테스트 모드에서만 출제)</span>
+        </label>
+      </div>
 
       <div style={{ display: 'flex', gap: '0.75rem' }}>
         <button type="submit" className="btn-primary" disabled={loading} style={{ padding: '0.7rem 1.5rem' }}>
