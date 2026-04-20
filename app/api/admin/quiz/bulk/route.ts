@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     const lv = parseInt(lvStr) || 1;
     const pt = parseInt(ptStr) || 10;
     const isOx = type === 'ox';
-    const isChosung = type === 'chosung';
+    const isChosung = type === 'chosung' || type === 'shuffle';
 
     try {
       const { rows: maxRows } = await db.query('SELECT ISNULL(MAX(id),0)+1 AS next_id FROM dbo.quiz');

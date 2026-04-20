@@ -8,10 +8,10 @@ interface Quiz {
   right_word: string; ox: string; shuffle: string; normal: string; survival_yn: string;
 }
 
-const TYPE_BADGE: Record<string, string> = { ox: 'OX', chosung: '초성', normal: '일반' };
+const TYPE_BADGE: Record<string, string> = { ox: 'OX', chosung: '셔플', normal: '일반' };
 
 function getType(q: Quiz): string {
-  if (q.type === 3 || q.shuffle === 'Y') return 'chosung';
+  if (q.shuffle === 'Y') return 'chosung';
   if (q.ox === 'Y') return 'ox';
   return 'normal';
 }
@@ -60,7 +60,7 @@ export default function QuizListClient({ initialParams }: { initialParams: any }
           style={{ padding: '0.5rem 0.75rem', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', fontSize: '0.875rem' }}>
           <option value="">전체 유형</option>
           <option value="ox">OX</option>
-          <option value="chosung">초성</option>
+          <option value="chosung">셔플</option>
           <option value="normal">일반</option>
         </select>
         <select value={lv} onChange={e => { setLv(e.target.value); setPage(1); }}

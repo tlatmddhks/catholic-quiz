@@ -23,7 +23,7 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
   const isEdit = !!initial?.id;
 
   const detectMode = (): QuizMode => {
-    if (initial?.type === 3 || initial?.shuffle === 'Y') return 'chosung';
+    if (initial?.shuffle === 'Y') return 'chosung';
     if (initial?.ox === 'Y') return 'ox';
     return 'normal';
   };
@@ -89,7 +89,7 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
       {/* 퀴즈 유형 탭 */}
       {!isEdit && (
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
-          {([['ox','OX 퀴즈'],['chosung','초성 퀴즈'],['normal','일반 퀴즈']] as [QuizMode,string][]).map(([v,l]) => (
+          {([['ox','OX 퀴즈'],['chosung','셔플 퀴즈'],['normal','일반 퀴즈']] as [QuizMode,string][]).map(([v,l]) => (
             <button key={v} type="button" onClick={() => setMode(v)}
               className={mode === v ? 'btn-primary' : 'btn-secondary'}
               style={{ padding: '0.5rem 1.2rem', fontSize: '0.875rem' }}>
@@ -122,7 +122,7 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
         <label style={labelStyle}>문제</label>
         <textarea style={{ ...inputStyle, minHeight: 80, resize: 'vertical' }}
           value={form.question} onChange={e => set('question', e.target.value)}
-          placeholder={mode === 'chosung' ? '초성 힌트 (예: ㄱㅅ)' : '문제를 입력하세요'} />
+          placeholder={mode === 'chosung' ? '셔플 힌트' : '문제를 입력하세요'} />
       </div>
 
       {mode === 'ox' ? (

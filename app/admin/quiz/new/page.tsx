@@ -2,7 +2,7 @@ import QuizForm from '../QuizForm';
 
 interface Props { searchParams: Promise<{ mode?: string }> }
 
-const TITLE: Record<string, string> = { ox: 'OX 퀴즈 등록', chosung: '초성 퀴즈 등록', normal: '일반 퀴즈 등록' };
+const TITLE: Record<string, string> = { ox: 'OX 퀴즈 등록', chosung: '셔플 퀴즈 등록', normal: '일반 퀴즈 등록' };
 
 export default async function NewQuizPage({ searchParams }: Props) {
   const { mode = 'ox' } = await searchParams;

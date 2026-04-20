@@ -3,7 +3,7 @@ import db from '@/lib/db';
 import { requireAdmin } from '@/lib/admin';
 import BlockButton from './BlockButton';
 
-const MODE_LABEL: Record<string, string> = { ox: 'OX', chosung: '초성', normal: '일반', survival: '서바이벌', random: '랜덤' };
+const MODE_LABEL: Record<string, string> = { ox: 'OX', chosung: '셔플', normal: '일반', survival: '서바이벌', random: '랜덤' };
 
 export default async function MemberDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const admin = await requireAdmin();

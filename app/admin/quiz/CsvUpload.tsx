@@ -26,7 +26,7 @@ export default function CsvUpload() {
   }
 
   function downloadTemplate() {
-    const csv = 'type,area,lv,pt,question,right_word,wrong_word,explain_word,survival_yn\nox,신앙,1,10,예수님은 하느님의 아들이다,O,,,N\nchosung,성경,2,20,ㅇㅅㅇ,이사야,,,N\nnormal,전례,3,30,다음 중 성사가 아닌 것은?,기도,세례/혼인/성체/고해,,N\n';
+    const csv = 'type,area,lv,pt,question,right_word,wrong_word,explain_word,survival_yn\nox,신앙,1,10,예수님은 하느님의 아들이다,O,,,N\nshuffle,성경,2,20,단어 맞추기 문제,정답단어,,,N\nnormal,전례,3,30,다음 중 성사가 아닌 것은?,기도,세례/혼인/성체/고해,,N\n';
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' }));
     a.download = 'quiz_template.csv';

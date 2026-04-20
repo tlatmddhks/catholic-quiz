@@ -23,7 +23,7 @@ async function getDashboardStats() {
 }
 
 const MODE_LABEL: Record<string, string> = {
-  ox: 'OX', chosung: '초성', survival: '서바이벌', random: '랜덤',
+  ox: 'OX', chosung: '셔플', survival: '서바이벌', random: '랜덤',
 };
 
 export default async function AdminDashboard() {

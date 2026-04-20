@@ -46,7 +46,7 @@ export default async function StatsPage() {
   const modeTotal = Object.values(modeMap).reduce((s, v) => s + v, 0);
   const modeItems = [
     { label: 'OX 퀴즈', key: 'ox', color: '#22c55e' },
-    { label: '초성 퀴즈', key: 'chosung', color: '#00d4ff' },
+    { label: '셔플 퀴즈', key: 'chosung', color: '#00d4ff' },
     { label: '일반 퀴즈', key: 'normal', color: '#a855f7' },
   ];
 

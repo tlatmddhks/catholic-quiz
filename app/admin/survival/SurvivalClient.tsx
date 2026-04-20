@@ -8,12 +8,12 @@ interface Quiz {
 
 const TYPE_LABEL: Record<string, { label: string; color: string }> = {
   ox:      { label: 'OX',  color: '#22c55e' },
-  chosung: { label: '초성', color: '#00d4ff' },
+  chosung: { label: '셔플', color: '#00d4ff' },
   normal:  { label: '일반', color: '#a855f7' },
 };
 
 function getType(q: Quiz) {
-  if (q.type === 3 || q.shuffle === 'Y') return 'chosung';
+  if (q.shuffle === 'Y') return 'chosung';
   if (q.ox === 'Y') return 'ox';
   return 'normal';
 }

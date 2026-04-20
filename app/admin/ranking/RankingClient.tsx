@@ -14,7 +14,7 @@ interface Ranking {
   played_at: string;
 }
 
-const MODE_LABEL: Record<string, string> = { ox: 'OX', chosung: '초성', normal: '일반' };
+const MODE_LABEL: Record<string, string> = { ox: 'OX', chosung: '셔플', normal: '일반' };
 const MODE_COLOR: Record<string, string> = { ox: '#22c55e', chosung: '#00d4ff', normal: '#a855f7' };
 
 export default function RankingClient() {
@@ -53,7 +53,7 @@ export default function RankingClient() {
           style={{ padding: '0.5rem 0.75rem', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', fontSize: '0.875rem' }}>
           <option value="">전체 유형</option>
           <option value="ox">OX</option>
-          <option value="chosung">초성</option>
+          <option value="chosung">셔플</option>
           <option value="normal">일반</option>
         </select>
         <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>총 {total.toLocaleString()}개</span>
