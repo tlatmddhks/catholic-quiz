@@ -1,5 +1,6 @@
 import { getSession } from './auth';
 import db from './db';
+import type { MenuKey } from './permissions';
 export { ALL_MENUS } from './permissions';
 export type { MenuKey } from './permissions';
 
