@@ -44,7 +44,12 @@ export async function GET(req: NextRequest) {
     try {
       ({ rows } = await runQuery(true));
     } catch {
-      ({ rows } = await runQuery(false));
+      if (mode === 'test') {
+        // is_test 컬럼 없음 → 빈 결과
+        rows = [];
+      } else {
+        ({ rows } = await runQuery(false));
+      }
     }
 
     const questions = rows.map((q: any) => ({
