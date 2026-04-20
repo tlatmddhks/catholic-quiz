@@ -138,6 +138,9 @@ body {
 .lv-6 { background: rgba(239,68,68,0.2); color: #ef4444; }
 .lv-7 { background: rgba(251,191,36,0.2); color: #fbbf24; }
 
+.lv-card { border-radius: 14px; padding: 1rem 0.5rem 0.9rem; display: flex; flex-direction: column; align-items: center; gap: 0.35rem; text-align: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; }
+.lv-card:hover { transform: translateY(-4px); }
+
 /* 초성 입력 */
 .chosung-input {
   background: rgba(255,255,255,0.05);
