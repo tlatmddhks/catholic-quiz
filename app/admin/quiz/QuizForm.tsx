@@ -23,7 +23,7 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
   const isEdit = !!initial?.id;
 
   const detectMode = (): QuizMode => {
-    if (initial?.shuffle === 'Y') return 'chosung';
+    if (initial?.type === 3 || initial?.shuffle === 'Y') return 'chosung';
     if (initial?.ox === 'Y') return 'ox';
     return 'normal';
   };

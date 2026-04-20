@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 interface Quiz {
-  id: number; area: string; lv: number; question: string;
+  id: number; area: string; lv: number; type: number; question: string;
   right_word: string; ox: string; shuffle: string; survival_yn: string;
 }
 
@@ -13,7 +13,7 @@ const TYPE_LABEL: Record<string, { label: string; color: string }> = {
 };
 
 function getType(q: Quiz) {
-  if (q.shuffle === 'Y') return 'chosung';
+  if (q.type === 3 || q.shuffle === 'Y') return 'chosung';
   if (q.ox === 'Y') return 'ox';
   return 'normal';
 }

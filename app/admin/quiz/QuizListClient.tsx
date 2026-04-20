@@ -4,14 +4,14 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 interface Quiz {
-  id: number; area: string; lv: number; pt: number; question: string;
+  id: number; area: string; lv: number; pt: number; type: number; question: string;
   right_word: string; ox: string; shuffle: string; normal: string; survival_yn: string;
 }
 
 const TYPE_BADGE: Record<string, string> = { ox: 'OX', chosung: '초성', normal: '일반' };
 
 function getType(q: Quiz): string {
-  if (q.shuffle === 'Y') return 'chosung';
+  if (q.type === 3 || q.shuffle === 'Y') return 'chosung';
   if (q.ox === 'Y') return 'ox';
   return 'normal';
 }
