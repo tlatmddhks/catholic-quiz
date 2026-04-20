@@ -30,7 +30,6 @@ export default async function MyPage() {
     { label: '이메일',   value: session.email || null },
     { label: '전화번호', value: session.phone_number || null },
     { label: '본당',     value: session.parish || session.church || null },
-    { label: '교구코드', value: session.gyogu_code || null },
   ];
 
   return (
