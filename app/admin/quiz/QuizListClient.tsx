@@ -6,7 +6,7 @@ import Link from 'next/link';
 interface Quiz {
   id: number; area: string; lv: number; pt: number; type: number; question: string;
   right_word: string; ox: string; shuffle: string; normal: string; survival_yn: string;
-  is_test?: string;
+  is_visible?: string; is_test?: string;
 }
 
 const TYPE_BADGE: Record<string, string> = { ox: 'OX', chosung: '셔플', normal: '일반' };
@@ -78,16 +78,16 @@ export default function QuizListClient({ initialParams }: { initialParams: any }
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--border)' }}>
-              {['ID','유형','Lv','영역','문제','정답','서바이벌','관리'].map(h => (
+              {['ID','유형','Lv','영역','문제','정답','서바이벌','노출','관리'].map(h => (
                 <th key={h} style={{ padding: '0.75rem 1rem', textAlign: 'left', color: 'var(--text-muted)', fontWeight: 700, whiteSpace: 'nowrap' }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={8} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>불러오는 중...</td></tr>
+              <tr><td colSpan={9} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>불러오는 중...</td></tr>
             ) : quizzes.length === 0 ? (
-              <tr><td colSpan={8} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>문제가 없습니다</td></tr>
+              <tr><td colSpan={9} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>문제가 없습니다</td></tr>
             ) : quizzes.map(quiz => {
               const t = getType(quiz);
               const colors: Record<string,string> = { ox: '#22c55e', chosung: '#00d4ff', normal: '#a855f7' };
@@ -116,6 +116,9 @@ export default function QuizListClient({ initialParams }: { initialParams: any }
                   </td>
                   <td style={{ padding: '0.65rem 1rem', color: quiz.survival_yn === 'Y' ? '#22c55e' : 'var(--text-muted)' }}>
                     {quiz.survival_yn === 'Y' ? '✓' : '-'}
+                  </td>
+                  <td style={{ padding: '0.65rem 1rem', color: quiz.is_visible === 'N' ? '#e94560' : '#22c55e' }}>
+                    {quiz.is_visible === 'N' ? '숨김' : '노출'}
                   </td>
                   <td style={{ padding: '0.65rem 1rem' }}>
                     <div style={{ display: 'flex', gap: '0.4rem' }}>
