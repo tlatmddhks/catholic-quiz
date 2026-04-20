@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
   const lv = searchParams.get('lv');
   const count = Math.min(parseInt(searchParams.get('count') || '10'), 30);
 
-  const cols = 'id, area, lv, pt, type, question, right_word, wrong_word, explain_word';
+  const cols = 'id, area, lv, pt, type, question, right_word, wrong_word, explain_word, ox, shuffle';
 
   async function runQuery(withVisibility: boolean) {
     const { conditions, params } = buildConditions(mode, lv, withVisibility);
@@ -57,6 +57,7 @@ export async function GET(req: NextRequest) {
       question: q.question, right_word: q.right_word,
       wrong_words: q.wrong_word ? q.wrong_word.split('/').map((w: string) => w.trim()).filter(Boolean) : [],
       explain_word: q.explain_word,
+      ox: q.ox, shuffle: q.shuffle,
     }));
 
     return NextResponse.json({ questions });

@@ -7,10 +7,11 @@ import Link from 'next/link';
 interface Question {
   id: number; area: number; lv: number; pt: number; type: number;
   question: string; right_word: string; wrong_words: string[]; explain_word: string | null;
+  ox?: string; shuffle?: string;
 }
 
 const MODE_LABELS: Record<string, string> = {
-  ox: 'OX 퀴즈', chosung: '셔플 퀴즈', normal: '일반 퀴즈', survival: '서바이벌', random: '랜덤 퀴즈',
+  ox: 'OX 퀴즈', chosung: '셔플 퀴즈', normal: '일반 퀴즈', survival: '서바이벌', random: '랜덤 퀴즈', test: '🧪 테스트',
 };
 const LV_LABELS: Record<number, string> = { 1:'입문',2:'초급',3:'중급',4:'고급',5:'전문',6:'마스터',7:'레전드' };
 const QUESTIONS_PER_GAME = 10;
@@ -45,8 +46,8 @@ export default function QuizGame() {
 
   const currentQ = questions[currentIdx];
   const isSurvival = mode === 'survival';
-  const isOX = mode === 'ox' || (mode !== 'chosung' && mode !== 'survival' && currentQ?.type === 1 && (currentQ?.right_word === 'O' || currentQ?.right_word === 'X'));
-  const isShuffle = mode === 'chosung';
+  const isShuffle = mode === 'chosung' || currentQ?.shuffle === 'Y';
+  const isOX = !isShuffle && (mode === 'ox' || currentQ?.ox === 'Y' || (currentQ?.right_word === 'O' || currentQ?.right_word === 'X'));
 
   // 문제 로드
   useEffect(() => {
