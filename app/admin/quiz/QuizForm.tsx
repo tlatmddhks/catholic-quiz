@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 type QuizMode = 'ox' | 'chosung' | 'normal';
@@ -32,7 +32,7 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
   const [form, setForm] = useState({
     area: initial?.area ? String(initial.area) : '0',
     lv: initial?.lv || 1,
-    pt: initial?.pt || 10,
+    pt: initial?.pt || 50,
     question: initial?.question || '',
     right_word: initial?.right_word || '',
     wrong1: initial?.wrong_word?.split('/')[0] || '',
@@ -43,6 +43,14 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [areas, setAreas] = useState<number[]>([]);
+
+  useEffect(() => {
+    fetch('/api/admin/quiz/areas')
+      .then(r => r.json())
+      .then(d => setAreas(d.areas || []))
+      .catch(() => {});
+  }, []);
 
   const set = (key: string, value: any) => setForm(f => ({ ...f, [key]: value }));
 
@@ -103,9 +111,12 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
       {error && <div style={{ color: '#e94560', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</div>}
 
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-        <div style={{ width: 80 }}>
+        <div style={{ width: 100 }}>
           <label style={labelStyle}>영역코드</label>
-          <input style={inputStyle} type="number" min={0} value={form.area} onChange={e => set('area', e.target.value)} placeholder="0" />
+          <select style={inputStyle} value={form.area} onChange={e => set('area', e.target.value)}>
+            <option value="0">-</option>
+            {areas.map(a => <option key={a} value={a}>{a}</option>)}
+          </select>
         </div>
         <div style={{ width: 100 }}>
           <label style={labelStyle}>난이도</label>
@@ -113,9 +124,11 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
             {[1,2,3,4,5,6,7].map(v => <option key={v} value={v}>Lv.{v}</option>)}
           </select>
         </div>
-        <div style={{ width: 80 }}>
+        <div style={{ width: 100 }}>
           <label style={labelStyle}>점수</label>
-          <input style={inputStyle} type="number" value={form.pt} onChange={e => set('pt', parseInt(e.target.value))} min={1} />
+          <select style={inputStyle} value={form.pt} onChange={e => set('pt', parseInt(e.target.value))}>
+            {[50,100,150,200,250,300,350].map(v => <option key={v} value={v}>{v}점</option>)}
+          </select>
         </div>
       </div>
 
