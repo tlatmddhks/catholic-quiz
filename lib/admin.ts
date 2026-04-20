@@ -3,6 +3,17 @@ import db from './db';
 
 export type AdminRole = 'super' | 'sub';
 
+export const ALL_MENUS = [
+  { key: 'quiz',     label: '문제 관리',     icon: '❓' },
+  { key: 'survival', label: '서바이벌 관리', icon: '❤️' },
+  { key: 'members',  label: '회원 관리',     icon: '👥' },
+  { key: 'notice',   label: '공지사항',      icon: '📢' },
+  { key: 'stats',    label: '통계',          icon: '📈' },
+  { key: 'ranking',  label: '랭킹 관리',     icon: '🏆' },
+] as const;
+
+export type MenuKey = typeof ALL_MENUS[number]['key'];
+
 function getSuperAdmin() {
   return process.env.SUPER_ADMIN || 'goodnews:679435';
 }
@@ -19,12 +30,42 @@ export async function getAdminRole(username: string): Promise<AdminRole | null> 
   }
 }
 
+// null = 전체 허용 (슈퍼관리자 or permissions 컬럼 NULL)
+export async function getAdminPermissions(username: string): Promise<MenuKey[] | null> {
+  if (username === getSuperAdmin()) return null;
+  try {
+    const { rows } = await db.query(
+      'SELECT permissions FROM dbo.quiz_admin WHERE username = @p1', [username]
+    );
+    if (!rows[0]) return null;
+    const raw = rows[0].permissions;
+    if (!raw) return null;
+    return raw.split(',').map((p: string) => p.trim()).filter(Boolean) as MenuKey[];
+  } catch {
+    return null;
+  }
+}
+
+export function hasPermission(permissions: MenuKey[] | null, key: MenuKey): boolean {
+  if (permissions === null) return true;
+  return permissions.includes(key);
+}
+
 export async function requireAdmin() {
   const session = await getSession().catch(() => null);
   if (!session) return null;
   const role = await getAdminRole(session.username);
   if (!role) return null;
   return { ...session, role };
+}
+
+export async function requireAdminWithPerms() {
+  const session = await getSession().catch(() => null);
+  if (!session) return null;
+  const role = await getAdminRole(session.username);
+  if (!role) return null;
+  const permissions = role === 'super' ? null : await getAdminPermissions(session.username);
+  return { ...session, role, permissions };
 }
 
 export async function requireSuperAdmin() {

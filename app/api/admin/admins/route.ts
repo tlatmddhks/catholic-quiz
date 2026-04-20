@@ -13,18 +13,23 @@ export async function GET() {
     try {
       ({ rows } = await db.query(`
         SELECT a.username, a.added_by, a.created_at,
+               ISNULL(a.permissions, NULL) AS permissions,
                u.name, u.nickname
         FROM dbo.quiz_admin a
         LEFT JOIN dbo.quiz_user u ON u.username = a.username
         ORDER BY a.created_at DESC
       `, []));
     } catch {
-      ({ rows } = await db.query(`
-        SELECT username, added_by, created_at,
-               NULL AS name, NULL AS nickname
-        FROM dbo.quiz_admin
-        ORDER BY created_at DESC
-      `, []));
+      try {
+        ({ rows } = await db.query(`
+          SELECT username, added_by, created_at,
+                 NULL AS permissions, NULL AS name, NULL AS nickname
+          FROM dbo.quiz_admin
+          ORDER BY created_at DESC
+        `, []));
+      } catch {
+        rows = [];
+      }
     }
 
     return NextResponse.json({ admins: rows });

@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
+import { ALL_MENUS, type MenuKey } from '@/lib/admin';
 
 interface Admin {
   username: string;
@@ -7,6 +8,7 @@ interface Admin {
   nickname: string | null;
   added_by: string;
   created_at: string;
+  permissions: string | null;
 }
 
 interface Member {
@@ -16,6 +18,76 @@ interface Member {
   nickname: string | null;
 }
 
+function parsePerms(raw: string | null): MenuKey[] | null {
+  if (!raw) return null;
+  return raw.split(',').map(p => p.trim()).filter(Boolean) as MenuKey[];
+}
+
+function PermEditor({ admin, onSaved }: { admin: Admin; onSaved: () => void }) {
+  const currentPerms = parsePerms(admin.permissions);
+  const [selected, setSelected] = useState<Set<MenuKey>>(
+    currentPerms ? new Set(currentPerms) : new Set(ALL_MENUS.map(m => m.key))
+  );
+  const [allGrant, setAllGrant] = useState(currentPerms === null);
+  const [saving, setSaving] = useState(false);
+
+  function toggleMenu(key: MenuKey) {
+    setSelected(prev => {
+      const s = new Set(prev);
+      s.has(key) ? s.delete(key) : s.add(key);
+      return s;
+    });
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    const permissions = allGrant ? null : Array.from(selected);
+    await fetch(`/api/admin/admins/${encodeURIComponent(admin.username)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ permissions }),
+    });
+    setSaving(false);
+    onSaved();
+  }
+
+  return (
+    <div style={{ marginTop: '0.75rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: 10, border: '1px solid var(--border)' }}>
+      <p style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>메뉴 권한 설정</p>
+
+      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: '#f5a623', fontSize: '0.85rem', cursor: 'pointer', fontWeight: 700 }}>
+        <input type="checkbox" checked={allGrant} onChange={e => setAllGrant(e.target.checked)} />
+        전체 메뉴 허용
+      </label>
+
+      {!allGrant && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
+          {ALL_MENUS.map(m => (
+            <label key={m.key} style={{
+              display: 'flex', alignItems: 'center', gap: '0.4rem',
+              padding: '0.3rem 0.75rem', borderRadius: 20,
+              border: `1px solid ${selected.has(m.key) ? 'var(--accent)' : 'var(--border)'}`,
+              background: selected.has(m.key) ? 'rgba(0,212,255,0.1)' : 'rgba(255,255,255,0.03)',
+              color: selected.has(m.key) ? 'var(--accent)' : 'var(--text-muted)',
+              fontSize: '0.82rem', cursor: 'pointer', fontWeight: selected.has(m.key) ? 700 : 400,
+              transition: 'all 0.15s',
+            }}>
+              <input type="checkbox" checked={selected.has(m.key)} onChange={() => toggleMenu(m.key)}
+                style={{ display: 'none' }} />
+              {m.icon} {m.label}
+            </label>
+          ))}
+        </div>
+      )}
+
+      <button onClick={handleSave} disabled={saving} className="btn-primary"
+        style={{ padding: '0.35rem 1rem', fontSize: '0.82rem' }}>
+        {saving ? '저장 중...' : '권한 저장'}
+      </button>
+    </div>
+  );
+}
+
 export default function AdminsClient() {
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [search, setSearch] = useState('');
@@ -23,6 +95,7 @@ export default function AdminsClient() {
   const [searching, setSearching] = useState(false);
   const [adding, setAdding] = useState(false);
   const [message, setMessage] = useState('');
+  const [openPerm, setOpenPerm] = useState<string | null>(null);
 
   const fetchAdmins = useCallback(async () => {
     const res = await fetch('/api/admin/admins');
@@ -66,6 +139,17 @@ export default function AdminsClient() {
     if (!confirm('이 관리자를 제거하시겠습니까?')) return;
     await fetch(`/api/admin/admins/${encodeURIComponent(username)}`, { method: 'DELETE' });
     fetchAdmins();
+  }
+
+  function permSummary(raw: string | null) {
+    if (!raw) return <span style={{ color: '#f5a623', fontSize: '0.78rem', fontWeight: 700 }}>전체 허용</span>;
+    const keys = raw.split(',').map(p => p.trim()).filter(Boolean);
+    if (keys.length === 0) return <span style={{ color: '#e94560', fontSize: '0.78rem' }}>권한 없음</span>;
+    return (
+      <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+        {keys.map(k => ALL_MENUS.find(m => m.key === k)?.label ?? k).join(', ')}
+      </span>
+    );
   }
 
   return (
@@ -117,37 +201,42 @@ export default function AdminsClient() {
       </div>
 
       {/* 현재 관리자 목록 */}
-      <div className="game-card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)', fontWeight: 700, fontSize: '0.95rem' }}>
+      <div className="game-card" style={{ padding: '1.25rem' }}>
+        <div style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: '1rem' }}>
           현재 서브 관리자 ({admins.length}명)
         </div>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid var(--border)' }}>
-              {['이름','계정','추가한 사람','추가일',''].map(h => (
-                <th key={h} style={{ padding: '0.75rem 1rem', textAlign: 'left', color: 'var(--text-muted)', fontWeight: 700 }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {admins.length === 0 ? (
-              <tr><td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>서브 관리자가 없습니다</td></tr>
-            ) : admins.map(a => (
-              <tr key={a.username} style={{ borderBottom: '1px solid var(--border)' }}>
-                <td style={{ padding: '0.65rem 1rem', color: 'var(--text)', fontWeight: 500 }}>{a.name || a.nickname || '-'}</td>
-                <td style={{ padding: '0.65rem 1rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>{a.username}</td>
-                <td style={{ padding: '0.65rem 1rem', color: 'var(--text-muted)' }}>{a.added_by}</td>
-                <td style={{ padding: '0.65rem 1rem', color: 'var(--text-muted)' }}>
-                  {a.created_at ? new Date(a.created_at).toLocaleDateString('ko-KR') : '-'}
-                </td>
-                <td style={{ padding: '0.65rem 1rem' }}>
-                  <button onClick={() => handleRemove(a.username)} className="btn-secondary"
-                    style={{ padding: '0.25rem 0.6rem', fontSize: '0.8rem', color: '#e94560' }}>제거</button>
-                </td>
-              </tr>
+
+        {admins.length === 0 ? (
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>서브 관리자가 없습니다</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {admins.map(a => (
+              <div key={a.username} style={{ border: '1px solid var(--border)', borderRadius: 12, padding: '1rem 1.25rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <span style={{ color: 'var(--text)', fontWeight: 600, marginRight: '0.5rem' }}>{a.name || a.nickname || '-'}</span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>{a.username}</span>
+                    <div style={{ marginTop: '0.3rem' }}>{permSummary(a.permissions)}</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <button
+                      onClick={() => setOpenPerm(openPerm === a.username ? null : a.username)}
+                      className="btn-secondary"
+                      style={{ padding: '0.25rem 0.7rem', fontSize: '0.8rem', color: 'var(--accent)' }}>
+                      {openPerm === a.username ? '닫기' : '권한 설정'}
+                    </button>
+                    <button onClick={() => handleRemove(a.username)} className="btn-secondary"
+                      style={{ padding: '0.25rem 0.6rem', fontSize: '0.8rem', color: '#e94560' }}>제거</button>
+                  </div>
+                </div>
+
+                {openPerm === a.username && (
+                  <PermEditor admin={a} onSaved={() => { fetchAdmins(); setOpenPerm(null); }} />
+                )}
+              </div>
             ))}
-          </tbody>
-        </table>
+          </div>
+        )}
       </div>
     </div>
   );

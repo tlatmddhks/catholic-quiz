@@ -1,24 +1,40 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { ALL_MENUS, type MenuKey } from '@/lib/admin';
 
-const baseLinks = [
-  { href: '/admin',          label: '대시보드',      icon: '📊' },
-  { href: '/admin/quiz',     label: '문제 관리',     icon: '❓' },
-  { href: '/admin/survival', label: '서바이벌 관리', icon: '❤️' },
-  { href: '/admin/members',  label: '회원 관리',     icon: '👥' },
-  { href: '/admin/notice',   label: '공지사항',      icon: '📢' },
-  { href: '/admin/stats',    label: '통계',          icon: '📈' },
-  { href: '/admin/ranking',  label: '랭킹 관리',     icon: '🏆' },
-];
+const MENU_HREF: Record<MenuKey, string> = {
+  quiz:     '/admin/quiz',
+  survival: '/admin/survival',
+  members:  '/admin/members',
+  notice:   '/admin/notice',
+  stats:    '/admin/stats',
+  ranking:  '/admin/ranking',
+};
 
 const superLinks = [
   { href: '/admin/admins', label: '관리자 관리', icon: '🔑' },
 ];
 
-export default function AdminSidebar({ isSuperAdmin }: { isSuperAdmin: boolean }) {
+export default function AdminSidebar({
+  isSuperAdmin,
+  permissions,
+}: {
+  isSuperAdmin: boolean;
+  permissions: MenuKey[] | null;
+}) {
   const pathname = usePathname();
-  const links = isSuperAdmin ? [...baseLinks, ...superLinks] : baseLinks;
+
+  const baseLinks = ALL_MENUS
+    .filter(m => permissions === null || permissions.includes(m.key))
+    .map(m => ({ href: MENU_HREF[m.key], label: m.label, icon: m.icon }));
+
+  const dashboardLink = { href: '/admin', label: '대시보드', icon: '📊' };
+  const links = [
+    dashboardLink,
+    ...baseLinks,
+    ...(isSuperAdmin ? superLinks : []),
+  ];
 
   return (
     <aside style={{
