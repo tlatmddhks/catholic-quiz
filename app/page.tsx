@@ -126,17 +126,39 @@ export default async function HomePage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.75rem' }}>
           {levels.map((l) => (
             <Link key={l.lv} href={`/play?mode=random&lv=${l.lv}`} style={{ textDecoration: 'none' }}>
-              <div className="game-card" style={{ padding: '0.875rem 0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', textAlign: 'center' }}>
+              <div style={{
+                borderRadius: 14,
+                background: `linear-gradient(160deg, ${l.color}18 0%, ${l.color}08 100%)`,
+                border: `1px solid ${l.color}44`,
+                padding: '1rem 0.5rem 0.9rem',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem',
+                textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s',
+                boxShadow: `0 2px 12px ${l.color}18`,
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)';
+                (e.currentTarget as HTMLDivElement).style.boxShadow = `0 8px 24px ${l.color}44`;
+                (e.currentTarget as HTMLDivElement).style.borderColor = `${l.color}99`;
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)';
+                (e.currentTarget as HTMLDivElement).style.boxShadow = `0 2px 12px ${l.color}18`;
+                (e.currentTarget as HTMLDivElement).style.borderColor = `${l.color}44`;
+              }}>
                 <div style={{
-                  width: 36, height: 36, borderRadius: '50%',
-                  background: `${l.color}22`, border: `2px solid ${l.color}66`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontWeight: 900, color: l.color, fontSize: '0.85rem',
+                  fontSize: '1.25rem', fontWeight: 900, letterSpacing: '-0.03em',
+                  background: `linear-gradient(135deg, ${l.color}, ${l.color}bb)`,
+                  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                 }}>
-                  {l.lv}
+                  {l.label}
                 </div>
-                <div style={{ fontWeight: 700, color: l.color, fontSize: '0.8rem' }}>{l.label}</div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{l.desc}</div>
+                <div style={{
+                  fontSize: '0.72rem', fontWeight: 700, color: l.color,
+                  background: `${l.color}22`, borderRadius: 20,
+                  padding: '0.15rem 0.55rem', letterSpacing: '0.02em',
+                }}>
+                  {l.desc}
+                </div>
               </div>
             </Link>
           ))}
