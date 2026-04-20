@@ -26,6 +26,14 @@ export default function QuizListClient({ initialParams }: { initialParams: any }
   const [lv, setLv] = useState(initialParams.lv || '');
   const [q, setQ] = useState(initialParams.q || '');
   const [loading, setLoading] = useState(false);
+  const [sortBy, setSortBy] = useState('');
+  const [sortDir, setSortDir] = useState<'asc'|'desc'>('asc');
+
+  function handleSort(col: string) {
+    if (sortBy === col) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortBy(col); setSortDir('asc'); }
+    setPage(1);
+  }
 
   const fetchQuizzes = useCallback(async () => {
     setLoading(true);
@@ -33,12 +41,13 @@ export default function QuizListClient({ initialParams }: { initialParams: any }
     if (type) params.set('type', type);
     if (lv)   params.set('lv', lv);
     if (q)    params.set('q', q);
+    if (sortBy) { params.set('sort', sortBy); params.set('dir', sortDir); }
     const res = await fetch(`/api/admin/quiz?${params}`);
     const data = await res.json();
     setQuizzes(data.quizzes || []);
     setTotal(data.total || 0);
     setLoading(false);
-  }, [page, type, lv, q]);
+  }, [page, type, lv, q, sortBy, sortDir]);
 
   useEffect(() => { fetchQuizzes(); }, [fetchQuizzes]);
 
@@ -78,8 +87,32 @@ export default function QuizListClient({ initialParams }: { initialParams: any }
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--border)' }}>
-              {['ID','유형','Lv','영역','문제','정답','서바이벌','노출','관리'].map(h => (
-                <th key={h} style={{ padding: '0.75rem 1rem', textAlign: 'left', color: 'var(--text-muted)', fontWeight: 700, whiteSpace: 'nowrap' }}>{h}</th>
+              {[
+                { label: 'ID', col: '' },
+                { label: '유형', col: 'type' },
+                { label: 'Lv', col: 'lv' },
+                { label: '영역', col: '' },
+                { label: '문제', col: '' },
+                { label: '정답', col: '' },
+                { label: '서바이벌', col: 'survival' },
+                { label: '노출', col: '' },
+                { label: '관리', col: '' },
+              ].map(({ label, col }) => (
+                <th key={label}
+                  onClick={col ? () => handleSort(col) : undefined}
+                  style={{
+                    padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 700, whiteSpace: 'nowrap',
+                    color: sortBy === col && col ? 'var(--accent)' : 'var(--text-muted)',
+                    cursor: col ? 'pointer' : 'default',
+                    userSelect: 'none',
+                  }}>
+                  {label}
+                  {col && (
+                    <span style={{ marginLeft: '0.3rem', fontSize: '0.75rem', opacity: sortBy === col ? 1 : 0.3 }}>
+                      {sortBy === col ? (sortDir === 'asc' ? '↑' : '↓') : '↕'}
+                    </span>
+                  )}
+                </th>
               ))}
             </tr>
           </thead>

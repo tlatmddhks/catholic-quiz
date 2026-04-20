@@ -12,8 +12,18 @@ export async function GET(req: NextRequest) {
   const type = searchParams.get('type') || '';
   const lv = searchParams.get('lv') || '';
   const q = searchParams.get('q') || '';
+  const sortBy = searchParams.get('sort') || '';
+  const sortDir = searchParams.get('dir') === 'asc' ? 'ASC' : 'DESC';
   const limit = 20;
   const offset = (page - 1) * limit;
+
+  const orderBy = sortBy === 'lv'
+    ? `lv ${sortDir}`
+    : sortBy === 'survival'
+    ? `survival_yn ${sortDir}, id DESC`
+    : sortBy === 'type'
+    ? `CASE WHEN shuffle='Y' THEN 1 WHEN ox='Y' THEN 2 ELSE 3 END ${sortDir}`
+    : 'id DESC';
 
   const conditions: string[] = [];
   const params: any[] = [];
@@ -34,7 +44,7 @@ export async function GET(req: NextRequest) {
         `SELECT id, area, lv, pt, type, question, right_word, wrong_word, explain_word, ox, shuffle, survival_yn, normal,
                 ISNULL(is_visible,'Y') AS is_visible, ISNULL(is_test,'N') AS is_test
          FROM dbo.quiz ${where}
-         ORDER BY id DESC
+         ORDER BY ${orderBy}
          OFFSET ${offset} ROWS FETCH NEXT ${limit} ROWS ONLY`,
         params
       ),
@@ -46,7 +56,7 @@ export async function GET(req: NextRequest) {
         `SELECT id, area, lv, pt, type, question, right_word, wrong_word, explain_word, ox, shuffle, survival_yn, normal,
                 'Y' AS is_visible, 'N' AS is_test
          FROM dbo.quiz ${where}
-         ORDER BY id DESC
+         ORDER BY ${orderBy}
          OFFSET ${offset} ROWS FETCH NEXT ${limit} ROWS ONLY`,
         params
       ),
