@@ -25,7 +25,7 @@ export async function getSession() {
             u.chukmonth, u.chukday, u.email, u.phone_number,
             u.parish, u.church, u.gyogu_code, u.bon_cd
      FROM dbo.quiz_session s JOIN dbo.quiz_user u ON u.user_id = s.user_id
-     WHERE s.session_id = @p1 AND s.expires_at > GETDATE()`,
+     WHERE s.session_id = @p1 AND s.expires_at > GETDATE() AND u.is_blocked = 0`,
     [sessionId]
   );
   return rows[0] || null;

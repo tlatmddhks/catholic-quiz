@@ -3,11 +3,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const links = [
-  { href: '/admin',         label: '대시보드',  icon: '📊' },
-  { href: '/admin/quiz',    label: '문제 관리', icon: '❓' },
-  { href: '/admin/members', label: '회원 관리', icon: '👥' },
-  { href: '/admin/stats',   label: '통계',      icon: '📈' },
-  { href: '/admin/ranking', label: '랭킹 관리', icon: '🏆' },
+  { href: '/admin',          label: '대시보드',      icon: '📊' },
+  { href: '/admin/quiz',     label: '문제 관리',     icon: '❓' },
+  { href: '/admin/survival', label: '서바이벌 관리', icon: '❤️' },
+  { href: '/admin/members',  label: '회원 관리',     icon: '👥' },
+  { href: '/admin/notice',   label: '공지사항',      icon: '📢' },
+  { href: '/admin/stats',    label: '통계',          icon: '📈' },
+  { href: '/admin/ranking',  label: '랭킹 관리',     icon: '🏆' },
 ];
 
 export default function AdminSidebar() {

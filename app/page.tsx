@@ -5,15 +5,21 @@ export const dynamic = 'force-dynamic';
 
 async function getStats() {
   try {
-    const { rows } = await db.query('SELECT COUNT(*) AS total FROM dbo.quiz');
-    return { total: rows[0]?.total ?? 0 };
+    const [quizRes, noticeRes] = await Promise.all([
+      db.query('SELECT COUNT(*) AS total FROM dbo.quiz'),
+      db.query('SELECT TOP 1 title, content FROM dbo.quiz_notice WHERE is_active=1 ORDER BY created_at DESC').catch(() => ({ rows: [] })),
+    ]);
+    return {
+      total: quizRes.rows[0]?.total ?? 0,
+      notice: noticeRes.rows[0] || null,
+    };
   } catch {
-    return { total: 0 };
+    return { total: 0, notice: null };
   }
 }
 
 export default async function HomePage() {
-  const { total } = await getStats();
+  const { total, notice } = await getStats();
 
   const modes = [
     { key: 'ox',       label: 'OX 퀴즈',  icon: '⭕',  desc: '참/거짓을 맞춰보세요!',       color: '#22c55e', cls: 'ox' },
@@ -34,6 +40,21 @@ export default async function HomePage() {
 
   return (
     <div style={{ maxWidth: 1000, margin: '0 auto', padding: '3rem 1.5rem' }}>
+      {/* 공지사항 배너 */}
+      {notice && (
+        <div style={{
+          background: 'rgba(233,69,96,0.08)', border: '1px solid rgba(233,69,96,0.3)',
+          borderRadius: 12, padding: '0.9rem 1.25rem', marginBottom: '2rem',
+          display: 'flex', gap: '0.75rem', alignItems: 'flex-start',
+        }}>
+          <span style={{ fontSize: '1rem', flexShrink: 0 }}>📢</span>
+          <div>
+            <strong style={{ color: '#e94560', fontSize: '0.875rem' }}>{notice.title}</strong>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: 4, whiteSpace: 'pre-wrap' }}>{notice.content}</p>
+          </div>
+        </div>
+      )}
+
       {/* 히어로 */}
       <div className="anim-fade-up" style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
         <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>✝️</div>

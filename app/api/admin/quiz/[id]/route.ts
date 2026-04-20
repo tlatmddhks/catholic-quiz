@@ -34,6 +34,14 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   return NextResponse.json({ ok: true });
 }
 
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  if (!await requireAdmin()) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  const { id } = await params;
+  const { survival_yn } = await req.json();
+  await db.query('UPDATE dbo.quiz SET survival_yn=@p1 WHERE id=@p2', [survival_yn, parseInt(id)]);
+  return NextResponse.json({ ok: true });
+}
+
 export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!await requireAdmin()) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   const { id } = await params;
