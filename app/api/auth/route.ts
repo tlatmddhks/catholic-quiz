@@ -14,16 +14,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: '모든 항목을 입력해주세요.' }, { status: 400 });
     }
     const { rows: exists } = await db.query(
-      'SELECT user_id FROM quiz_user WHERE username = @p1', [username]
+      'SELECT user_id FROM dbo.quiz_user WHERE username = @p1', [username]
     );
     if (exists.length > 0) {
       return NextResponse.json({ error: '이미 사용 중인 아이디입니다.' }, { status: 400 });
     }
     const hashed = await bcrypt.hash(password, 10);
-    const { rows: maxRows } = await db.query('SELECT ISNULL(MAX(user_id),0)+1 AS next_id FROM quiz_user');
+    const { rows: maxRows } = await db.query('SELECT ISNULL(MAX(user_id),0)+1 AS next_id FROM dbo.quiz_user');
     const userId = maxRows[0].next_id;
     await db.query(
-      'INSERT INTO quiz_user (user_id, username, password_hash, nickname, created_at) VALUES (@p1,@p2,@p3,@p4,GETDATE())',
+      'INSERT INTO dbo.quiz_user (user_id, username, password_hash, nickname, created_at) VALUES (@p1,@p2,@p3,@p4,GETDATE())',
       [userId, username, hashed, nickname]
     );
     const sessionId = await createSession(userId);
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: '아이디와 비밀번호를 입력해주세요.' }, { status: 400 });
     }
     const { rows } = await db.query(
-      'SELECT user_id, password_hash, nickname FROM quiz_user WHERE username = @p1', [username]
+      'SELECT user_id, password_hash, nickname FROM dbo.quiz_user WHERE username = @p1', [username]
     );
     if (!rows[0]) return NextResponse.json({ error: '아이디 또는 비밀번호가 틀렸습니다.' }, { status: 401 });
     const ok = await bcrypt.compare(password, rows[0].password_hash);

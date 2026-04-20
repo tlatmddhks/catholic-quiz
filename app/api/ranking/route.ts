@@ -22,8 +22,8 @@ export async function GET(req: NextRequest) {
        SUM(r.correct_count) AS total_correct,
        COUNT(r.result_id) AS play_count,
        MAX(r.played_at) AS last_played
-     FROM quiz_result r
-     JOIN quiz_user u ON u.user_id = r.user_id
+     FROM dbo.quiz_result r
+     JOIN dbo.quiz_user u ON u.user_id = r.user_id
      ${modeFilter}
      GROUP BY u.user_id, u.nickname, r.mode
      ORDER BY best_score DESC`,

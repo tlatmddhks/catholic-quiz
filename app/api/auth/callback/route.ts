@@ -74,19 +74,19 @@ export async function GET(req: NextRequest) {
 
   // 사용자 upsert
   const { rows: existing } = await db.query(
-    'SELECT user_id FROM quiz_user WHERE username = @p1',
+    'SELECT user_id FROM dbo.quiz_user WHERE username = @p1',
     [username]
   );
 
   let userId: number;
   if (existing.length > 0) {
     userId = existing[0].user_id;
-    await db.query('UPDATE quiz_user SET nickname = @p1 WHERE user_id = @p2', [nickname, userId]);
+    await db.query('UPDATE dbo.quiz_user SET nickname = @p1 WHERE user_id = @p2', [nickname, userId]);
   } else {
-    const { rows: maxRows } = await db.query('SELECT ISNULL(MAX(user_id),0)+1 AS next_id FROM quiz_user');
+    const { rows: maxRows } = await db.query('SELECT ISNULL(MAX(user_id),0)+1 AS next_id FROM dbo.quiz_user');
     userId = maxRows[0].next_id;
     await db.query(
-      'INSERT INTO quiz_user (user_id, username, password_hash, nickname, created_at) VALUES (@p1,@p2,@p3,@p4,GETDATE())',
+      'INSERT INTO dbo.quiz_user (user_id, username, password_hash, nickname, created_at) VALUES (@p1,@p2,@p3,@p4,GETDATE())',
       [userId, username, 'GOODNEWS_OAUTH', nickname]
     );
   }
