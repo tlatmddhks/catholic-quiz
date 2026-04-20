@@ -8,7 +8,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div style={{ display: 'flex', minHeight: 'calc(100vh - 64px)' }}>
-      <AdminSidebar />
+      <AdminSidebar isSuperAdmin={session.role === 'super'} />
       <main style={{ flex: 1, padding: '2rem', overflowX: 'auto' }}>
         {children}
       </main>

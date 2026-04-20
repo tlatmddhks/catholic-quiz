@@ -10,7 +10,7 @@ interface Session {
   gyogu_code?: string; bon_cd?: string;
 }
 
-export default function NavBar({ session }: { session: Session | null }) {
+export default function NavBar({ session, isAdmin }: { session: Session | null; isAdmin?: boolean }) {
   const router = useRouter();
 
   async function handleLogout() {
@@ -44,6 +44,14 @@ export default function NavBar({ session }: { session: Session | null }) {
           <Link href="/ranking" style={{ textDecoration: 'none' }}>
             <button className="btn-secondary" style={{ padding: '0.4rem 1rem', fontSize: '0.875rem' }}>🏆 랭킹</button>
           </Link>
+
+          {isAdmin && (
+            <Link href="/admin" style={{ textDecoration: 'none' }}>
+              <button className="btn-secondary" style={{ padding: '0.4rem 1rem', fontSize: '0.875rem', color: '#f5a623', borderColor: '#f5a62366' }}>
+                ⚙️ 관리자
+              </button>
+            </Link>
+          )}
 
           {session ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
