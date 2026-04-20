@@ -4,23 +4,10 @@ import { requireSuperAdmin } from '@/lib/admin';
 
 export const runtime = 'nodejs';
 
-async function ensureTable() {
-  await db.query(`
-    IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name='quiz_admin' AND schema_id=SCHEMA_ID('dbo'))
-    CREATE TABLE dbo.quiz_admin (
-      username    NVARCHAR(100) NOT NULL PRIMARY KEY,
-      added_by    NVARCHAR(100) NOT NULL,
-      created_at  DATETIME2     NOT NULL DEFAULT GETDATE()
-    )
-  `, []);
-}
-
 export async function GET() {
   try {
     const admin = await requireSuperAdmin();
     if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-
-    await ensureTable();
 
     let rows: any[] = [];
     try {
@@ -71,8 +58,6 @@ export async function POST(req: NextRequest) {
     } catch {
       // quiz_user 조회 실패 시 존재 확인 건너뜀
     }
-
-    await ensureTable();
 
     await db.query(
       `IF NOT EXISTS (SELECT 1 FROM dbo.quiz_admin WHERE username=@p1)
