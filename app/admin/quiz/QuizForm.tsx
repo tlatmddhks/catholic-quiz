@@ -74,11 +74,12 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
 
     try {
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-      if (!res.ok) throw new Error('저장 실패');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '저장 실패');
       router.push('/admin/quiz');
       router.refresh();
-    } catch {
-      setError('저장 중 오류가 발생했습니다.');
+    } catch (e: any) {
+      setError(e.message || '저장 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
     }

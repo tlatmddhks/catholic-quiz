@@ -43,20 +43,25 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   if (!await requireAdmin()) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
-  const body = await req.json();
-  const { rows: maxRows } = await db.query('SELECT ISNULL(MAX(id),0)+1 AS next_id FROM dbo.quiz');
-  const newId = maxRows[0].next_id;
+  try {
+    const body = await req.json();
+    const { rows: maxRows } = await db.query('SELECT ISNULL(MAX(id),0)+1 AS next_id FROM dbo.quiz');
+    const newId = maxRows[0].next_id;
 
-  await db.query(
-    `INSERT INTO dbo.quiz (id, area, lv, pt, type, question, right_word, wrong_word, explain_word, ox, shuffle, survival_yn, normal)
-     VALUES (@p1,@p2,@p3,@p4,@p5,@p6,@p7,@p8,@p9,@p10,@p11,@p12,@p13)`,
-    [
-      newId,
-      body.area || '', body.lv || 1, body.pt || 10, body.type || 1,
-      body.question, body.right_word, body.wrong_word || null, body.explain_word || null,
-      body.ox || 'N', body.shuffle || 'N', body.survival_yn || 'N', body.normal || 'N',
-    ]
-  );
+    await db.query(
+      `INSERT INTO dbo.quiz (id, area, lv, pt, type, question, right_word, wrong_word, explain_word, ox, shuffle, survival_yn, normal)
+       VALUES (@p1,@p2,@p3,@p4,@p5,@p6,@p7,@p8,@p9,@p10,@p11,@p12,@p13)`,
+      [
+        newId,
+        body.area || '', body.lv || 1, body.pt || 10, body.type || 1,
+        body.question, body.right_word, body.wrong_word || null, body.explain_word || null,
+        body.ox || 'N', body.shuffle || 'N', body.survival_yn || 'N', body.normal || 'N',
+      ]
+    );
 
-  return NextResponse.json({ ok: true, id: newId });
+    return NextResponse.json({ ok: true, id: newId });
+  } catch (e: any) {
+    console.error('[quiz POST]', e);
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
 }
