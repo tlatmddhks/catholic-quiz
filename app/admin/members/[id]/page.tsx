@@ -10,19 +10,28 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
   if (!admin) redirect('/');
   const { id } = await params;
 
-  const [userRes, playsRes] = await Promise.all([
-    db.query(
+  let userRes;
+  try {
+    userRes = await db.query(
       `SELECT user_id, username, name, nickname, christen, chukmonth, chukday,
               email, phone_number, parish, church, is_blocked, created_at
        FROM dbo.quiz_user WHERE user_id = @p1`,
       [parseInt(id)]
-    ),
-    db.query(
-      `SELECT TOP 50 result_id, mode, lv, score, correct_count, total_questions, time_sec, played_at
-       FROM dbo.quiz_result WHERE user_id = @p1 ORDER BY played_at DESC`,
+    );
+  } catch {
+    userRes = await db.query(
+      `SELECT user_id, username, name, nickname, christen, chukmonth, chukday,
+              email, phone_number, parish, church, CAST(0 AS BIT) AS is_blocked, created_at
+       FROM dbo.quiz_user WHERE user_id = @p1`,
       [parseInt(id)]
-    ),
-  ]);
+    );
+  }
+
+  const playsRes = await db.query(
+    `SELECT TOP 50 result_id, mode, lv, score, correct_count, total_questions, time_sec, played_at
+     FROM dbo.quiz_result WHERE user_id = @p1 ORDER BY played_at DESC`,
+    [parseInt(id)]
+  );
 
   const user = userRes.rows[0];
   if (!user) notFound();
