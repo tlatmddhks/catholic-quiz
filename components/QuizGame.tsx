@@ -257,32 +257,45 @@ export default function QuizGame() {
         /* 셔플 퀴즈 - 빈칸 채우기 */
         <div style={{ marginBottom: '1.5rem' }}>
           {/* 정답 빈칸 박스 */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-            {Array.from({ length: currentQ.right_word.length }).map((_, i) => {
-              const filled = selectedTiles[i];
-              const isAnswered = answerState !== 'idle';
-              const correctChar = currentQ.right_word[i];
-              let boxBg = filled ? 'var(--accent)' : 'rgba(255,255,255,0.04)';
-              let boxBorder = filled ? 'var(--accent)' : 'var(--border)';
-              let boxColor = filled ? '#000' : 'transparent';
-              if (isAnswered) {
-                boxBg = answerState === 'correct' ? 'rgba(34,197,94,0.3)' : filled?.char === correctChar ? 'rgba(34,197,94,0.3)' : 'rgba(233,69,96,0.3)';
-                boxBorder = answerState === 'correct' ? '#22c55e' : filled?.char === correctChar ? '#22c55e' : '#e94560';
-                boxColor = 'var(--text)';
-              }
-              return (
-                <div key={i} style={{
-                  width: 52, height: 52, borderRadius: 10,
-                  border: `2px solid ${boxBorder}`,
-                  background: boxBg,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontWeight: 900, fontSize: '1.3rem', color: boxColor,
-                  transition: 'all 0.2s',
-                }}>
-                  {filled?.char || ''}
-                </div>
-              );
-            })}
+          <div style={{
+            background: 'rgba(255,255,255,0.04)', borderRadius: 16,
+            padding: '1.25rem 1rem', marginBottom: '1.25rem',
+            border: '1px solid var(--border)',
+          }}>
+            <p style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textAlign: 'center', marginBottom: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              정답 입력 ({currentQ.right_word.length}글자)
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+              {Array.from({ length: currentQ.right_word.length }).map((_, i) => {
+                const filled = selectedTiles[i];
+                const isAnswered = answerState !== 'idle';
+                const correctChar = currentQ.right_word[i];
+                let boxBg = filled ? 'var(--accent)' : 'rgba(255,255,255,0.06)';
+                let boxBorder = filled ? 'var(--accent)' : 'rgba(255,255,255,0.25)';
+                let boxColor = filled ? '#000' : 'rgba(255,255,255,0.15)';
+                let boxShadow = filled ? '0 0 12px rgba(0,212,255,0.4)' : 'none';
+                if (isAnswered) {
+                  const ok = filled?.char === correctChar;
+                  boxBg = ok ? 'rgba(34,197,94,0.25)' : 'rgba(233,69,96,0.25)';
+                  boxBorder = ok ? '#22c55e' : '#e94560';
+                  boxColor = 'var(--text)';
+                  boxShadow = ok ? '0 0 12px rgba(34,197,94,0.4)' : '0 0 12px rgba(233,69,96,0.4)';
+                }
+                return (
+                  <div key={i} style={{
+                    width: 58, height: 58, borderRadius: 12,
+                    border: `2px solid ${boxBorder}`,
+                    background: boxBg,
+                    boxShadow,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontWeight: 900, fontSize: '1.5rem', color: boxColor,
+                    transition: 'all 0.2s',
+                  }}>
+                    {filled?.char || ''}
+                  </div>
+                );
+              })}
+            </div>
           </div>
           {/* 글자 타일 */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '1rem', justifyContent: 'center' }}>
