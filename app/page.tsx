@@ -21,12 +21,13 @@ async function getStats() {
 export default async function HomePage() {
   const { total, notice } = await getStats();
 
-  const modes = [
-    { key: 'ox',       label: 'OX 퀴즈',  icon: '⭕',  desc: '참/거짓을 맞춰보세요!',       color: '#22c55e', cls: 'ox' },
-    { key: 'chosung',  label: '초성 퀴즈', icon: '🔤',  desc: '초성 힌트로 단어를 맞춰요!',  color: '#00d4ff', cls: 'cho' },
-    { key: 'survival', label: '서바이벌',  icon: '❤️',  desc: '3번 틀리면 게임 오버!',       color: '#e94560', cls: 'surv' },
-    { key: 'random',   label: '랜덤 퀴즈', icon: '🎲',  desc: '모든 유형이 랜덤으로!',       color: '#a855f7', cls: 'rand' },
+  const mainModes = [
+    { key: 'ox',      label: 'OX 퀴즈',  icon: '⭕', desc: '참/거짓을 맞춰보세요!',      color: '#22c55e', cls: 'ox' },
+    { key: 'chosung', label: '셔플 퀴즈', icon: '🔀', desc: '단어를 셔플해서 맞춰요!',     color: '#00d4ff', cls: 'cho' },
+    { key: 'normal',  label: '일반 퀴즈', icon: '📝', desc: '4지선다 객관식 문제!',        color: '#f5a623', cls: 'norm' },
+    { key: 'random',  label: '랜덤 퀴즈', icon: '🎲', desc: '모든 유형이 랜덤으로!',       color: '#a855f7', cls: 'rand' },
   ];
+  const survival = { key: 'survival', label: '서바이벌', icon: '❤️', desc: '3번 틀리면 게임 오버! 얼마나 버틸 수 있을까?', color: '#e94560', cls: 'surv' };
 
   const levels = [
     { lv: 1, label: 'Lv.1', desc: '입문',  color: '#22c55e' },
@@ -80,17 +81,27 @@ export default async function HomePage() {
         <p style={{ fontSize: '0.8rem', fontWeight: 800, marginBottom: '1rem', color: 'var(--text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
           🎮 게임 모드 선택
         </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '1rem' }}>
-          {modes.map((m) => (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
+          {mainModes.map((m) => (
             <Link key={m.key} href={`/play?mode=${m.key}`} style={{ textDecoration: 'none' }}>
               <div className={`mode-card ${m.cls}`}>
-                <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>{m.icon}</div>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: m.color, marginBottom: '0.4rem' }}>{m.label}</h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{m.desc}</p>
+                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>{m.icon}</div>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: m.color, marginBottom: '0.4rem' }}>{m.label}</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.825rem' }}>{m.desc}</p>
               </div>
             </Link>
           ))}
         </div>
+        <Link href={`/play?mode=${survival.key}`} style={{ textDecoration: 'none' }}>
+          <div className={`mode-card ${survival.cls}`} style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', padding: '1.25rem 2rem' }}>
+            <span style={{ fontSize: '2.5rem', flexShrink: 0 }}>{survival.icon}</span>
+            <div>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: survival.color, marginBottom: '0.3rem' }}>{survival.label}</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{survival.desc}</p>
+            </div>
+            <span style={{ marginLeft: 'auto', color: survival.color, fontSize: '1.5rem' }}>→</span>
+          </div>
+        </Link>
       </div>
 
       {/* 레벨별 도전 */}

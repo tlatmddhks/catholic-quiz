@@ -16,13 +16,12 @@ export async function GET(req: NextRequest) {
     conditions.push('ox = @p' + (params.length + 1)); params.push('Y');
   } else if (mode === 'chosung') {
     conditions.push('shuffle = @p' + (params.length + 1)); params.push('Y');
-    conditions.push('type = @p' + (params.length + 1)); params.push(3);
+  } else if (mode === 'normal') {
+    conditions.push('normal = @p' + (params.length + 1)); params.push('Y');
   } else if (mode === 'survival') {
     conditions.push('survival_yn = @p' + (params.length + 1)); params.push('Y');
-  } else {
-    conditions.push('(normal = @p' + (params.length + 1) + ' OR ox = @p' + (params.length + 2) + ')');
-    params.push('Y', 'Y');
   }
+  // random: 조건 없이 전체에서 추출
 
   if (lv) {
     conditions.push('lv = @p' + (params.length + 1));
