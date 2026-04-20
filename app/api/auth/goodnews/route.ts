@@ -24,7 +24,7 @@ export async function GET() {
   });
 
   const res = NextResponse.redirect(`${AUTH_URL}?${params}`);
-  res.cookies.set('oauth_verifier', codeVerifier, { httpOnly: true, maxAge: 600, path: '/' });
-  res.cookies.set('oauth_state', state, { httpOnly: true, maxAge: 600, path: '/' });
+  res.cookies.set('oauth_verifier', codeVerifier, { httpOnly: true, maxAge: 600, path: '/', sameSite: 'lax' });
+  res.cookies.set('oauth_state', state, { httpOnly: true, maxAge: 600, path: '/', sameSite: 'lax' });
   return res;
 }

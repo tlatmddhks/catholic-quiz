@@ -23,6 +23,7 @@ export async function GET(req: NextRequest) {
   const codeVerifier = req.cookies.get('oauth_verifier')?.value;
 
   if (state !== cookieState || !codeVerifier) {
+    console.error('[auth/callback] state mismatch or missing verifier', { state, cookieState, hasVerifier: !!codeVerifier });
     return NextResponse.redirect(`${base}/login?error=invalid`);
   }
 
@@ -83,7 +84,7 @@ export async function GET(req: NextRequest) {
   // 세션 생성
   const sessionId = await createSession(userId);
   const res = NextResponse.redirect(base);
-  res.cookies.set('qsession', sessionId, { httpOnly: true, maxAge: 60 * 60 * 24 * 7, path: '/' });
+  res.cookies.set('qsession', sessionId, { httpOnly: true, maxAge: 60 * 60 * 24 * 7, path: '/', sameSite: 'lax' });
   res.cookies.delete('oauth_state');
   res.cookies.delete('oauth_verifier');
   return res;

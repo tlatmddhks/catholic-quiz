@@ -1,9 +1,20 @@
-export default function LoginPage({ searchParams }: { searchParams: { error?: string } }) {
+import { redirect } from 'next/navigation';
+import { getSession } from '@/lib/auth';
+
+interface Props {
+  searchParams: Promise<{ error?: string }>;
+}
+
+export default async function LoginPage({ searchParams }: Props) {
+  const session = await getSession().catch(() => null);
+  if (session) redirect('/');
+
+  const { error } = await searchParams;
   const errorMsg =
-    searchParams.error === 'oauth' ? '로그인 중 오류가 발생했습니다.' :
-    searchParams.error === 'invalid' ? '잘못된 접근입니다.' :
-    searchParams.error === 'token' ? '인증 처리 중 오류가 발생했습니다.' :
-    searchParams.error === 'userinfo' ? '사용자 정보를 가져오지 못했습니다.' : null;
+    error === 'oauth'     ? '로그인 중 오류가 발생했습니다.' :
+    error === 'invalid'   ? '인증 정보가 만료됐습니다. 다시 시도해 주세요.' :
+    error === 'token'     ? '인증 처리 중 오류가 발생했습니다.' :
+    error === 'userinfo'  ? '사용자 정보를 가져오지 못했습니다.' : null;
 
   return (
     <div style={{ maxWidth: 440, margin: '4rem auto', padding: '0 1.5rem' }}>
