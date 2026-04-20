@@ -25,10 +25,20 @@ export async function getSession() {
             u.chukmonth, u.chukday, u.email, u.phone_number,
             u.parish, u.church, u.gyogu_code, u.bon_cd
      FROM dbo.quiz_session s JOIN dbo.quiz_user u ON u.user_id = s.user_id
-     WHERE s.session_id = @p1 AND s.expires_at > GETDATE() AND u.is_blocked = 0`,
+     WHERE s.session_id = @p1 AND s.expires_at > GETDATE()`,
     [sessionId]
   );
-  return rows[0] || null;
+  const user = rows[0];
+  if (!user) return null;
+  try {
+    const { rows: bRows } = await db.query(
+      'SELECT is_blocked FROM dbo.quiz_user WHERE user_id = @p1', [user.user_id]
+    );
+    if (bRows[0]?.is_blocked) return null;
+  } catch {
+    // is_blocked 컬럼 없음 (admin_schema_v2.sql 미적용) - 무시
+  }
+  return user;
 }
 
 export async function deleteSession(sessionId: string) {
