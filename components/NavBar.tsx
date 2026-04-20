@@ -3,7 +3,12 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-interface Session { user_id: number; username: string; nickname: string; }
+interface Session {
+  user_id: number; username: string; nickname: string;
+  name?: string; christen?: string; chukmonth?: number; chukday?: number;
+  email?: string; phone_number?: string; parish?: string; church?: string;
+  gyogu_code?: string; bon_cd?: string;
+}
 
 export default function NavBar({ session }: { session: Session | null }) {
   const router = useRouter();
@@ -42,9 +47,11 @@ export default function NavBar({ session }: { session: Session | null }) {
 
           {session ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-                <span style={{ color: 'var(--accent)', fontWeight: 700 }}>{session.nickname}</span>님
-              </span>
+              <Link href="/my" style={{ textDecoration: 'none' }}>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem', cursor: 'pointer' }}>
+                  <span style={{ color: 'var(--accent)', fontWeight: 700 }}>{session.name || session.nickname}</span>님
+                </span>
+              </Link>
               <button onClick={handleLogout} className="btn-secondary" style={{ padding: '0.4rem 1rem', fontSize: '0.875rem' }}>
                 로그아웃
               </button>

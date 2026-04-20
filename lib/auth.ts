@@ -21,7 +21,9 @@ export async function getSession() {
   const sessionId = cookieStore.get('qsession')?.value;
   if (!sessionId) return null;
   const { rows } = await db.query(
-    `SELECT u.user_id, u.username, u.nickname
+    `SELECT u.user_id, u.username, u.nickname, u.name, u.christen,
+            u.chukmonth, u.chukday, u.email, u.phone_number,
+            u.parish, u.church, u.gyogu_code, u.bon_cd
      FROM dbo.quiz_session s JOIN dbo.quiz_user u ON u.user_id = s.user_id
      WHERE s.session_id = @p1 AND s.expires_at > GETDATE()`,
     [sessionId]
