@@ -98,22 +98,20 @@ export default async function HomePage() {
         <p style={{ fontSize: '0.8rem', fontWeight: 800, marginBottom: '1rem', color: 'var(--text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
           ⚡ 레벨별 도전
         </p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.75rem' }}>
           {levels.map((l) => (
             <Link key={l.lv} href={`/play?mode=random&lv=${l.lv}`} style={{ textDecoration: 'none' }}>
-              <div className="game-card" style={{ padding: '0.875rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div className="game-card" style={{ padding: '0.875rem 0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', textAlign: 'center' }}>
                 <div style={{
-                  width: 40, height: 40, borderRadius: '50%',
+                  width: 36, height: 36, borderRadius: '50%',
                   background: `${l.color}22`, border: `2px solid ${l.color}66`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontWeight: 900, color: l.color, fontSize: '0.85rem',
                 }}>
                   {l.lv}
                 </div>
-                <div>
-                  <div style={{ fontWeight: 700, color: l.color, fontSize: '0.95rem' }}>{l.label}</div>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{l.desc}</div>
-                </div>
+                <div style={{ fontWeight: 700, color: l.color, fontSize: '0.8rem' }}>{l.label}</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{l.desc}</div>
               </div>
             </Link>
           ))}
