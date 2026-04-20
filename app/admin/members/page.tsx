@@ -13,20 +13,40 @@ export default async function MembersPage({ searchParams }: Props) {
   const where = q ? `WHERE u.name LIKE @p1 OR u.nickname LIKE @p2 OR u.parish LIKE @p3` : '';
   if (q) whereParams.push(`%${q}%`, `%${q}%`, `%${q}%`);
 
-  const [listRes, countRes] = await Promise.all([
-    db.query(
-      `SELECT u.user_id, u.name, u.nickname, u.christen, u.parish, u.church, u.email, u.is_blocked, u.created_at,
-              CAST(ISNULL(COUNT(r.result_id),0) AS INT) AS play_count
-       FROM dbo.quiz_user u
-       LEFT JOIN dbo.quiz_result r ON r.user_id = u.user_id
-       ${where}
-       GROUP BY u.user_id, u.name, u.nickname, u.christen, u.parish, u.church, u.email, u.is_blocked, u.created_at
-       ORDER BY u.created_at DESC
-       OFFSET ${offset} ROWS FETCH NEXT ${limit} ROWS ONLY`,
-      whereParams
-    ),
-    db.query(`SELECT CAST(COUNT(*) AS INT) AS total FROM dbo.quiz_user u ${where}`, whereParams),
-  ]);
+  let listRes, countRes;
+  try {
+    [listRes, countRes] = await Promise.all([
+      db.query(
+        `SELECT u.user_id, u.name, u.nickname, u.christen, u.parish, u.church, u.email, u.is_blocked, u.created_at,
+                CAST(ISNULL(COUNT(r.result_id),0) AS INT) AS play_count
+         FROM dbo.quiz_user u
+         LEFT JOIN dbo.quiz_result r ON r.user_id = u.user_id
+         ${where}
+         GROUP BY u.user_id, u.name, u.nickname, u.christen, u.parish, u.church, u.email, u.is_blocked, u.created_at
+         ORDER BY u.created_at DESC
+         OFFSET ${offset} ROWS FETCH NEXT ${limit} ROWS ONLY`,
+        whereParams
+      ),
+      db.query(`SELECT CAST(COUNT(*) AS INT) AS total FROM dbo.quiz_user u ${where}`, whereParams),
+    ]);
+  } catch {
+    // admin_schema_v2.sql 미적용 시 is_blocked 없이 조회
+    [listRes, countRes] = await Promise.all([
+      db.query(
+        `SELECT u.user_id, u.name, u.nickname, u.christen, u.parish, u.church, u.email,
+                CAST(0 AS BIT) AS is_blocked, u.created_at,
+                CAST(ISNULL(COUNT(r.result_id),0) AS INT) AS play_count
+         FROM dbo.quiz_user u
+         LEFT JOIN dbo.quiz_result r ON r.user_id = u.user_id
+         ${where}
+         GROUP BY u.user_id, u.name, u.nickname, u.christen, u.parish, u.church, u.email, u.created_at
+         ORDER BY u.created_at DESC
+         OFFSET ${offset} ROWS FETCH NEXT ${limit} ROWS ONLY`,
+        whereParams
+      ),
+      db.query(`SELECT CAST(COUNT(*) AS INT) AS total FROM dbo.quiz_user u ${where}`, whereParams),
+    ]);
+  }
 
   const members = listRes.rows;
   const total = countRes.rows[0]?.total ?? 0;
