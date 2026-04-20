@@ -24,7 +24,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
          ox=@p9, shuffle=@p10, survival_yn=@p11, normal=@p12
        WHERE id=@p13`,
       [
-        body.area || '', body.lv || 1, body.pt || 10, body.type || 1,
+        parseInt(body.area) || 0, body.lv || 1, body.pt || 10, body.type || 1,
         body.question, body.right_word, body.wrong_word || null, body.explain_word || null,
         body.ox || 'N', body.shuffle || 'N', body.survival_yn || 'N', body.normal || 'N',
         parseInt(id),

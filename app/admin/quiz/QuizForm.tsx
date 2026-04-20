@@ -30,7 +30,7 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
 
   const [mode, setMode] = useState<QuizMode>(initial ? detectMode() : 'ox');
   const [form, setForm] = useState({
-    area: initial?.area || '',
+    area: initial?.area ? String(initial.area) : '0',
     lv: initial?.lv || 1,
     pt: initial?.pt || 10,
     question: initial?.question || '',
@@ -103,9 +103,9 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
       {error && <div style={{ color: '#e94560', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</div>}
 
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-        <div style={{ flex: 1 }}>
-          <label style={labelStyle}>영역</label>
-          <input style={inputStyle} value={form.area} onChange={e => set('area', e.target.value)} placeholder="예: 성사, 교리, 성인" />
+        <div style={{ width: 80 }}>
+          <label style={labelStyle}>영역코드</label>
+          <input style={inputStyle} type="number" min={0} value={form.area} onChange={e => set('area', e.target.value)} placeholder="0" />
         </div>
         <div style={{ width: 100 }}>
           <label style={labelStyle}>난이도</label>
