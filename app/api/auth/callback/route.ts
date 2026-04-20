@@ -54,6 +54,7 @@ export async function GET(req: NextRequest) {
 
   if (id_token) {
     const payload = JSON.parse(Buffer.from(id_token.split('.')[1], 'base64url').toString());
+    console.log('[id_token payload]', JSON.stringify(payload));
     sub = payload.sub;
     nickname = payload.name || payload.nickname || payload.preferred_username || sub;
   } else {
