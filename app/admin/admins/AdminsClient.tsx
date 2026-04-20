@@ -55,30 +55,35 @@ function PermEditor({ admin, onSaved }: { admin: Admin; onSaved: () => void }) {
     <div style={{ marginTop: '0.75rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: 10, border: '1px solid var(--border)' }}>
       <p style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>메뉴 권한 설정</p>
 
-      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: '#f5a623', fontSize: '0.85rem', cursor: 'pointer', fontWeight: 700 }}>
+      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: '#f5a623', fontSize: '0.85rem', cursor: 'pointer', fontWeight: 700 }}>
         <input type="checkbox" checked={allGrant} onChange={e => setAllGrant(e.target.checked)} />
         전체 메뉴 허용
+        <span style={{ color: 'var(--text-muted)', fontWeight: 400, fontSize: '0.78rem' }}>
+          (해제하면 메뉴별로 선택 가능)
+        </span>
       </label>
 
-      {!allGrant && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
-          {ALL_MENUS.map(m => (
-            <label key={m.key} style={{
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
+        {ALL_MENUS.map(m => {
+          const isOn = allGrant || selected.has(m.key);
+          return (
+            <label key={m.key} onClick={() => !allGrant && toggleMenu(m.key)} style={{
               display: 'flex', alignItems: 'center', gap: '0.4rem',
               padding: '0.3rem 0.75rem', borderRadius: 20,
-              border: `1px solid ${selected.has(m.key) ? 'var(--accent)' : 'var(--border)'}`,
-              background: selected.has(m.key) ? 'rgba(0,212,255,0.1)' : 'rgba(255,255,255,0.03)',
-              color: selected.has(m.key) ? 'var(--accent)' : 'var(--text-muted)',
-              fontSize: '0.82rem', cursor: 'pointer', fontWeight: selected.has(m.key) ? 700 : 400,
+              border: `1px solid ${isOn ? 'var(--accent)' : 'var(--border)'}`,
+              background: isOn ? 'rgba(0,212,255,0.1)' : 'rgba(255,255,255,0.03)',
+              color: isOn ? 'var(--accent)' : 'var(--text-muted)',
+              fontSize: '0.82rem',
+              cursor: allGrant ? 'default' : 'pointer',
+              fontWeight: isOn ? 700 : 400,
+              opacity: allGrant ? 0.6 : 1,
               transition: 'all 0.15s',
             }}>
-              <input type="checkbox" checked={selected.has(m.key)} onChange={() => toggleMenu(m.key)}
-                style={{ display: 'none' }} />
               {m.icon} {m.label}
             </label>
-          ))}
-        </div>
-      )}
+          );
+        })}
+      </div>
 
       <button onClick={handleSave} disabled={saving} className="btn-primary"
         style={{ padding: '0.35rem 1rem', fontSize: '0.82rem' }}>
