@@ -19,8 +19,9 @@ export async function GET(req: NextRequest) {
   const params: any[] = [];
 
   if (type === 'ox')      { conditions.push('ox = @p' + (params.length+1)); params.push('Y'); }
-  if (type === 'chosung') { conditions.push('type = @p' + (params.length+1)); params.push(3); }
+  if (type === 'chosung') { conditions.push('shuffle = @p' + (params.length+1)); params.push('Y'); }
   if (type === 'normal')  { conditions.push('normal = @p' + (params.length+1)); params.push('Y'); }
+  if (type === 'test')    { conditions.push('is_test = @p' + (params.length+1)); params.push('Y'); }
   if (lv)                 { conditions.push('lv = @p' + (params.length+1)); params.push(parseInt(lv)); }
   if (q)                  { conditions.push('question LIKE @p' + (params.length+1)); params.push(`%${q}%`); }
 

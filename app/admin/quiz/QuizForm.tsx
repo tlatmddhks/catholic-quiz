@@ -66,7 +66,7 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
 
     const wrong_word = mode === 'normal'
       ? [form.wrong1, form.wrong2, form.wrong3].filter(Boolean).join('/')
-      : mode === 'chosung' ? form.wrong1 : '';
+      : mode === 'chosung' ? form.wrong1.replace(/\//g, '').split('').filter(Boolean).join('/') : '';
 
     const payload = {
       area: form.area, lv: form.lv, pt: form.pt,

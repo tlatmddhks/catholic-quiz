@@ -6,6 +6,7 @@ import Link from 'next/link';
 interface Quiz {
   id: number; area: string; lv: number; pt: number; type: number; question: string;
   right_word: string; ox: string; shuffle: string; normal: string; survival_yn: string;
+  is_test?: string;
 }
 
 const TYPE_BADGE: Record<string, string> = { ox: 'OX', chosung: '셔플', normal: '일반' };
@@ -62,6 +63,7 @@ export default function QuizListClient({ initialParams }: { initialParams: any }
           <option value="ox">OX</option>
           <option value="chosung">셔플</option>
           <option value="normal">일반</option>
+          <option value="test">테스트</option>
         </select>
         <select value={lv} onChange={e => { setLv(e.target.value); setPage(1); }}
           style={{ padding: '0.5rem 0.75rem', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', fontSize: '0.875rem' }}>
@@ -93,9 +95,16 @@ export default function QuizListClient({ initialParams }: { initialParams: any }
                 <tr key={quiz.id} style={{ borderBottom: '1px solid var(--border)' }}>
                   <td style={{ padding: '0.65rem 1rem', color: 'var(--text-muted)' }}>{quiz.id}</td>
                   <td style={{ padding: '0.65rem 1rem' }}>
-                    <span style={{ background: colors[t]+'22', color: colors[t], padding: '0.2rem 0.5rem', borderRadius: 6, fontSize: '0.8rem', fontWeight: 700 }}>
-                      {TYPE_BADGE[t]}
-                    </span>
+                    <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
+                      <span style={{ background: colors[t]+'22', color: colors[t], padding: '0.2rem 0.5rem', borderRadius: 6, fontSize: '0.8rem', fontWeight: 700 }}>
+                        {TYPE_BADGE[t]}
+                      </span>
+                      {quiz.is_test === 'Y' && (
+                        <span style={{ background: 'rgba(245,166,35,0.15)', color: '#f5a623', padding: '0.2rem 0.5rem', borderRadius: 6, fontSize: '0.8rem', fontWeight: 700 }}>
+                          🧪
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td style={{ padding: '0.65rem 1rem', color: 'var(--text-muted)' }}>Lv.{quiz.lv}</td>
                   <td style={{ padding: '0.65rem 1rem', color: 'var(--text-muted)' }}>{quiz.area || '-'}</td>
