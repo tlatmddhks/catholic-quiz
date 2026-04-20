@@ -78,7 +78,7 @@ export default function QuizListClient({ initialParams }: { initialParams: any }
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--border)' }}>
-              {['ID','유형','Lv','영역','문제','정답','서바','관리'].map(h => (
+              {['ID','유형','Lv','영역','문제','정답','서바이벌','관리'].map(h => (
                 <th key={h} style={{ padding: '0.75rem 1rem', textAlign: 'left', color: 'var(--text-muted)', fontWeight: 700, whiteSpace: 'nowrap' }}>{h}</th>
               ))}
             </tr>
