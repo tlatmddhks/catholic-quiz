@@ -154,11 +154,48 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
         </div>
       </div>
 
+      {mode === 'image' && (
+        <div style={{ marginBottom: '1.25rem' }}>
+          <label style={labelStyle}>이미지</label>
+          <input
+            type="file" accept="image/*" id="img-upload"
+            onChange={handleImageUpload} disabled={uploading}
+            style={{ display: 'none' }}
+          />
+          {form.image_url ? (
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <img src={form.image_url} alt="preview" style={{ display: 'block', maxWidth: '100%', maxHeight: 240, borderRadius: 10, border: '2px solid var(--accent)', objectFit: 'contain' }} />
+              <label htmlFor="img-upload" style={{
+                position: 'absolute', bottom: 8, right: 8,
+                background: 'rgba(0,0,0,0.65)', color: '#fff', fontSize: '0.78rem',
+                padding: '0.3rem 0.7rem', borderRadius: 6, cursor: 'pointer', fontWeight: 700,
+              }}>
+                {uploading ? '업로드 중...' : '🖼️ 변경'}
+              </label>
+            </div>
+          ) : (
+            <label htmlFor="img-upload" style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              gap: '0.5rem', width: '100%', height: 160,
+              border: '2px dashed var(--border)', borderRadius: 10,
+              cursor: uploading ? 'default' : 'pointer',
+              color: 'var(--text-muted)', fontSize: '0.875rem',
+              background: 'rgba(255,255,255,0.02)',
+              transition: 'border-color 0.2s',
+            }}>
+              <span style={{ fontSize: '2rem' }}>🖼️</span>
+              <span style={{ fontWeight: 700 }}>{uploading ? '업로드 중...' : '이미지 등록'}</span>
+              <span style={{ fontSize: '0.75rem' }}>클릭하여 파일 선택 (JPG, PNG, GIF, WEBP)</span>
+            </label>
+          )}
+        </div>
+      )}
+
       <div style={{ marginBottom: '1rem' }}>
-        <label style={labelStyle}>문제</label>
+        <label style={labelStyle}>{mode === 'image' ? '문제 설명 (선택)' : '문제'}</label>
         <textarea style={{ ...inputStyle, minHeight: 80, resize: 'vertical' }}
           value={form.question} onChange={e => set('question', e.target.value)}
-          placeholder={mode === 'chosung' ? '셔플 힌트' : '문제를 입력하세요'} />
+          placeholder={mode === 'chosung' ? '셔플 힌트' : mode === 'image' ? '이미지에 대한 힌트나 설명 (없어도 됩니다)' : '문제를 입력하세요'} />
       </div>
 
       {mode === 'ox' ? (
@@ -191,20 +228,6 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
         </div>
       )}
 
-      {mode === 'image' && (
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={labelStyle}>이미지 업로드</label>
-          <input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading}
-            style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text)', fontSize: '0.875rem' }} />
-          {uploading && <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>업로드 중...</span>}
-          {form.image_url && (
-            <div style={{ marginTop: '0.5rem' }}>
-              <img src={form.image_url} alt="preview" style={{ maxWidth: 240, maxHeight: 160, borderRadius: 8, border: '1px solid var(--border)' }} />
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>{form.image_url}</div>
-            </div>
-          )}
-        </div>
-      )}
 
       {mode === 'chosung' && (
         <div style={{ marginBottom: '1rem' }}>
