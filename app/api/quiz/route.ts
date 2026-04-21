@@ -15,7 +15,7 @@ function buildConditions(mode: string, lv: string | null, withVisibility: boolea
     else if (mode === 'normal')  { conditions.push('normal = @p'  + (params.length + 1)); params.push('Y'); }
     else if (mode === 'survival'){ conditions.push('survival_yn = @p' + (params.length + 1)); params.push('Y'); }
     else if (mode === 'image')   { conditions.push('image_url IS NOT NULL'); }
-    if (withVisibility) {
+    if (withVisibility && mode !== 'image') {
       conditions.push('is_visible = @p' + (params.length + 1)); params.push('Y');
     }
   }
