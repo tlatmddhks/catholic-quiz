@@ -23,6 +23,8 @@ export async function GET(req: NextRequest) {
     ? `survival_yn ${sortDir}, id DESC`
     : sortBy === 'type'
     ? `CASE WHEN shuffle='Y' THEN 1 WHEN ox='Y' THEN 2 ELSE 3 END ${sortDir}`
+    : sortBy === 'visible'
+    ? `ISNULL(is_visible,'Y') ${sortDir}, id DESC`
     : 'id DESC';
 
   const conditions: string[] = [];

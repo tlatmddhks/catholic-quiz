@@ -63,6 +63,16 @@ export default function QuizListClient({ initialParams }: { initialParams: any }
     fetchQuizzes();
   }
 
+  async function handleToggle(id: number, field: 'is_visible' | 'is_test' | 'survival_yn', current: string) {
+    const next = current === 'Y' ? 'N' : 'Y';
+    setQuizzes(prev => prev.map(q => q.id === id ? { ...q, [field]: next } : q));
+    await fetch(`/api/admin/quiz/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ [field]: next }),
+    });
+  }
+
   const totalPages = Math.ceil(total / 20);
 
   return (
@@ -102,7 +112,8 @@ export default function QuizListClient({ initialParams }: { initialParams: any }
                 { label: '문제', col: '' },
                 { label: '정답', col: '' },
                 { label: '서바이벌', col: 'survival' },
-                { label: '노출', col: '' },
+                { label: '노출', col: 'visible' },
+                { label: '테스트', col: '' },
                 { label: '관리', col: '' },
               ].map(({ label, col }) => (
                 <th key={label}
@@ -125,9 +136,9 @@ export default function QuizListClient({ initialParams }: { initialParams: any }
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={9} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>불러오는 중...</td></tr>
+              <tr><td colSpan={10} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>불러오는 중...</td></tr>
             ) : quizzes.length === 0 ? (
-              <tr><td colSpan={9} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>문제가 없습니다</td></tr>
+              <tr><td colSpan={10} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>문제가 없습니다</td></tr>
             ) : quizzes.map(quiz => {
               const t = getType(quiz);
               const badge = TYPE_BADGE[t] ?? { label: '일반', color: '#a855f7' };
@@ -142,11 +153,6 @@ export default function QuizListClient({ initialParams }: { initialParams: any }
                       {quiz.image_url && (
                         <img src={quiz.image_url} alt="" style={{ width: 28, height: 28, borderRadius: 4, objectFit: 'cover', border: '1px solid var(--border)' }} />
                       )}
-                      {quiz.is_test === 'Y' && (
-                        <span style={{ background: 'rgba(245,166,35,0.15)', color: '#f5a623', padding: '0.2rem 0.5rem', borderRadius: 6, fontSize: '0.8rem', fontWeight: 700 }}>
-                          🧪
-                        </span>
-                      )}
                     </div>
                   </td>
                   <td style={{ padding: '0.65rem 1rem', color: 'var(--text-muted)' }}>Lv.{quiz.lv}</td>
@@ -157,11 +163,20 @@ export default function QuizListClient({ initialParams }: { initialParams: any }
                   <td style={{ padding: '0.65rem 1rem', color: 'var(--text)', maxWidth: 120 }}>
                     <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{quiz.right_word}</div>
                   </td>
-                  <td style={{ padding: '0.65rem 1rem', color: quiz.survival_yn === 'Y' ? '#22c55e' : 'var(--text-muted)' }}>
-                    {quiz.survival_yn === 'Y' ? '✓' : '-'}
+                  <td style={{ padding: '0.65rem 1rem', textAlign: 'center' }}>
+                    <input type="checkbox" checked={quiz.survival_yn === 'Y'}
+                      onChange={() => handleToggle(quiz.id, 'survival_yn', quiz.survival_yn || 'N')}
+                      style={{ width: 16, height: 16, cursor: 'pointer', accentColor: '#22c55e' }} />
                   </td>
-                  <td style={{ padding: '0.65rem 1rem', color: quiz.is_visible === 'N' ? '#e94560' : '#22c55e' }}>
-                    {quiz.is_visible === 'N' ? '숨김' : '노출'}
+                  <td style={{ padding: '0.65rem 1rem', textAlign: 'center' }}>
+                    <input type="checkbox" checked={quiz.is_visible !== 'N'}
+                      onChange={() => handleToggle(quiz.id, 'is_visible', quiz.is_visible === 'N' ? 'N' : 'Y')}
+                      style={{ width: 16, height: 16, cursor: 'pointer', accentColor: '#00d4ff' }} />
+                  </td>
+                  <td style={{ padding: '0.65rem 1rem', textAlign: 'center' }}>
+                    <input type="checkbox" checked={quiz.is_test === 'Y'}
+                      onChange={() => handleToggle(quiz.id, 'is_test', quiz.is_test || 'N')}
+                      style={{ width: 16, height: 16, cursor: 'pointer', accentColor: '#f5a623' }} />
                   </td>
                   <td style={{ padding: '0.65rem 1rem' }}>
                     <div style={{ display: 'flex', gap: '0.4rem' }}>

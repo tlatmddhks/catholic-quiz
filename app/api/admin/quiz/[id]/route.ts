@@ -59,8 +59,14 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!await requireAdmin()) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   const { id } = await params;
-  const { survival_yn } = await req.json();
-  await db.query('UPDATE dbo.quiz SET survival_yn=@p1 WHERE id=@p2', [survival_yn, parseInt(id)]);
+  const body = await req.json();
+  if ('survival_yn' in body) {
+    await db.query('UPDATE dbo.quiz SET survival_yn=@p1 WHERE id=@p2', [body.survival_yn, parseInt(id)]);
+  } else if ('is_visible' in body) {
+    await db.query('UPDATE dbo.quiz SET is_visible=@p1 WHERE id=@p2', [body.is_visible, parseInt(id)]);
+  } else if ('is_test' in body) {
+    await db.query('UPDATE dbo.quiz SET is_test=@p1 WHERE id=@p2', [body.is_test, parseInt(id)]);
+  }
   return NextResponse.json({ ok: true });
 }
 
