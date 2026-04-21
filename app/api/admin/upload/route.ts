@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer());
     await writeFile(path.join(dir, filename), buffer);
 
-    return NextResponse.json({ url: `/images/quiz/${filename}` });
+    return NextResponse.json({ url: `/api/quiz-image/${filename}` });
   } catch (e: any) {
     console.error('[upload POST]', e);
     return NextResponse.json({ error: e.message }, { status: 500 });
