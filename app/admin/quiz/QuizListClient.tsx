@@ -6,12 +6,18 @@ import Link from 'next/link';
 interface Quiz {
   id: number; area: string; lv: number; pt: number; type: number; question: string;
   right_word: string; ox: string; shuffle: string; normal: string; survival_yn: string;
-  is_visible?: string; is_test?: string;
+  is_visible?: string; is_test?: string; image_url?: string;
 }
 
-const TYPE_BADGE: Record<string, string> = { ox: 'OX', chosung: '셔플', normal: '일반' };
+const TYPE_BADGE: Record<string, { label: string; color: string }> = {
+  ox:      { label: 'OX',    color: '#22c55e' },
+  chosung: { label: '셔플',  color: '#f5a623' },
+  normal:  { label: '일반',  color: '#a855f7' },
+  image:   { label: '이미지', color: '#00d4ff' },
+};
 
 function getType(q: Quiz): string {
+  if (q.image_url) return 'image';
   if (q.shuffle === 'Y') return 'chosung';
   if (q.ox === 'Y') return 'ox';
   return 'normal';
@@ -72,6 +78,7 @@ export default function QuizListClient({ initialParams }: { initialParams: any }
           <option value="ox">OX</option>
           <option value="chosung">셔플</option>
           <option value="normal">일반</option>
+          <option value="image">이미지</option>
           <option value="test">테스트</option>
         </select>
         <select value={lv} onChange={e => { setLv(e.target.value); setPage(1); }}
@@ -123,15 +130,18 @@ export default function QuizListClient({ initialParams }: { initialParams: any }
               <tr><td colSpan={9} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>문제가 없습니다</td></tr>
             ) : quizzes.map(quiz => {
               const t = getType(quiz);
-              const colors: Record<string,string> = { ox: '#22c55e', chosung: '#00d4ff', normal: '#a855f7' };
+              const badge = TYPE_BADGE[t] ?? { label: '일반', color: '#a855f7' };
               return (
                 <tr key={quiz.id} style={{ borderBottom: '1px solid var(--border)' }}>
                   <td style={{ padding: '0.65rem 1rem', color: 'var(--text-muted)' }}>{quiz.id}</td>
                   <td style={{ padding: '0.65rem 1rem' }}>
-                    <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
-                      <span style={{ background: colors[t]+'22', color: colors[t], padding: '0.2rem 0.5rem', borderRadius: 6, fontSize: '0.8rem', fontWeight: 700 }}>
-                        {TYPE_BADGE[t]}
+                    <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                      <span style={{ background: badge.color+'22', color: badge.color, padding: '0.2rem 0.5rem', borderRadius: 6, fontSize: '0.8rem', fontWeight: 700 }}>
+                        {badge.label}
                       </span>
+                      {quiz.image_url && (
+                        <img src={quiz.image_url} alt="" style={{ width: 28, height: 28, borderRadius: 4, objectFit: 'cover', border: '1px solid var(--border)' }} />
+                      )}
                       {quiz.is_test === 'Y' && (
                         <span style={{ background: 'rgba(245,166,35,0.15)', color: '#f5a623', padding: '0.2rem 0.5rem', borderRadius: 6, fontSize: '0.8rem', fontWeight: 700 }}>
                           🧪
