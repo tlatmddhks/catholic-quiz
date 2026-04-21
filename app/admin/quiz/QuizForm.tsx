@@ -8,7 +8,7 @@ interface QuizData {
   id?: number; area?: string; lv?: number; pt?: number; type?: number;
   question?: string; right_word?: string; wrong_word?: string; explain_word?: string;
   ox?: string; shuffle?: string; survival_yn?: string; normal?: string;
-  is_visible?: string; is_test?: string; image_url?: string;
+  is_visible?: string; is_test?: string; image_url?: string; _imageMode?: boolean;
 }
 
 const inputStyle: React.CSSProperties = {
@@ -24,7 +24,7 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
   const isEdit = !!initial?.id;
 
   const detectMode = (): QuizMode => {
-    if (initial?.image_url) return 'image';
+    if (initial?._imageMode || initial?.image_url) return 'image';
     if (initial?.shuffle === 'Y') return 'chosung';
     if (initial?.ox === 'Y') return 'ox';
     return 'normal';

@@ -14,6 +14,7 @@ export default async function AdminQuizPage({ searchParams }: Props) {
           <Link href="/admin/quiz/new?mode=ox"><button className="btn-primary" style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}>+ OX 등록</button></Link>
           <Link href="/admin/quiz/new?mode=chosung"><button className="btn-primary" style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}>+ 셔플 등록</button></Link>
           <Link href="/admin/quiz/new?mode=normal"><button className="btn-primary" style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}>+ 일반 등록</button></Link>
+          <Link href="/admin/quiz/new?mode=image"><button className="btn-primary" style={{ fontSize: '0.85rem', padding: '0.5rem 1rem', background: '#00d4ff', color: '#000' }}>🖼️ 이미지 등록</button></Link>
         </div>
       </div>
       <div style={{ marginBottom: '1.25rem' }}>

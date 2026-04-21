@@ -90,13 +90,14 @@ export async function POST(req: NextRequest) {
       );
     } catch {
       await db.query(
-        `INSERT INTO dbo.quiz (id, area, lv, pt, type, question, right_word, wrong_word, explain_word, ox, shuffle, survival_yn, normal)
-         VALUES (@p1,@p2,@p3,@p4,@p5,@p6,@p7,@p8,@p9,@p10,@p11,@p12,@p13)`,
+        `INSERT INTO dbo.quiz (id, area, lv, pt, type, question, right_word, wrong_word, explain_word, ox, shuffle, survival_yn, normal, image_url)
+         VALUES (@p1,@p2,@p3,@p4,@p5,@p6,@p7,@p8,@p9,@p10,@p11,@p12,@p13,@p14)`,
         [
           newId,
           parseInt(body.area) || 0, body.lv || 1, body.pt || 50, body.type || 1,
           body.question, body.right_word, body.wrong_word || null, body.explain_word || null,
           body.ox || 'N', body.shuffle || 'N', body.survival_yn || 'N', body.normal || 'N',
+          body.image_url || null,
         ]
       );
     }
