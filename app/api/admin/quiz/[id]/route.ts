@@ -23,13 +23,13 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
            area=@p1, lv=@p2, pt=@p3, type=@p4, question=@p5,
            right_word=@p6, wrong_word=@p7, explain_word=@p8,
            ox=@p9, shuffle=@p10, survival_yn=@p11, normal=@p12,
-           is_visible=@p13, is_test=@p14
-         WHERE id=@p15`,
+           is_visible=@p13, is_test=@p14, image_url=@p15
+         WHERE id=@p16`,
         [
           parseInt(body.area) || 0, body.lv || 1, body.pt || 50, body.type || 1,
           body.question, body.right_word, body.wrong_word || null, body.explain_word || null,
           body.ox || 'N', body.shuffle || 'N', body.survival_yn || 'N', body.normal || 'N',
-          body.is_visible || 'Y', body.is_test || 'N',
+          body.is_visible || 'Y', body.is_test || 'N', body.image_url || null,
           parseInt(id),
         ]
       );

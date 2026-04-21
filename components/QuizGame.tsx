@@ -7,11 +7,11 @@ import Link from 'next/link';
 interface Question {
   id: number; area: number; lv: number; pt: number; type: number;
   question: string; right_word: string; wrong_words: string[]; explain_word: string | null;
-  ox?: string; shuffle?: string;
+  ox?: string; shuffle?: string; image_url?: string | null;
 }
 
 const MODE_LABELS: Record<string, string> = {
-  ox: 'OX 퀴즈', chosung: '셔플 퀴즈', normal: '일반 퀴즈', survival: '서바이벌', random: '랜덤 퀴즈', test: '🧪 테스트',
+  ox: 'OX 퀴즈', chosung: '셔플 퀴즈', normal: '일반 퀴즈', survival: '서바이벌', random: '랜덤 퀴즈', test: '🧪 테스트', image: '이미지 퀴즈',
 };
 const LV_LABELS: Record<number, string> = { 1:'입문',2:'초급',3:'중급',4:'고급',5:'전문',6:'마스터',7:'레전드' };
 const QUESTIONS_PER_GAME = 10;
@@ -46,8 +46,9 @@ export default function QuizGame() {
 
   const currentQ = questions[currentIdx];
   const isSurvival = mode === 'survival';
-  const isShuffle = mode === 'chosung' || currentQ?.shuffle === 'Y';
-  const isOX = !isShuffle && (mode === 'ox' || currentQ?.ox === 'Y' || (currentQ?.right_word === 'O' || currentQ?.right_word === 'X'));
+  const isImage = mode === 'image' || !!currentQ?.image_url;
+  const isShuffle = !isImage && (mode === 'chosung' || currentQ?.shuffle === 'Y');
+  const isOX = !isShuffle && !isImage && (mode === 'ox' || currentQ?.ox === 'Y' || (currentQ?.right_word === 'O' || currentQ?.right_word === 'X'));
 
   // 문제 로드
   useEffect(() => {
@@ -260,9 +261,20 @@ export default function QuizGame() {
 
       {/* 문제 카드 */}
       <div key={currentIdx} className="game-card anim-fade-up" style={{ padding: '2rem', marginBottom: '1.5rem' }}>
-        <p style={{ fontSize: '1.15rem', fontWeight: 600, lineHeight: 1.8, color: 'var(--text)', whiteSpace: 'pre-wrap' }}>
-          {currentQ.question}
-        </p>
+        {currentQ.image_url && (
+          <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+            <img
+              src={currentQ.image_url}
+              alt="quiz"
+              style={{ maxWidth: '100%', maxHeight: 280, borderRadius: 12, objectFit: 'contain' }}
+            />
+          </div>
+        )}
+        {currentQ.question && (
+          <p style={{ fontSize: '1.15rem', fontWeight: 600, lineHeight: 1.8, color: 'var(--text)', whiteSpace: 'pre-wrap', textAlign: currentQ.image_url ? 'center' : 'left' }}>
+            {currentQ.question}
+          </p>
+        )}
       </div>
 
       {/* OX 버튼 */}

@@ -100,14 +100,21 @@ export default async function HomePage() {
               <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', margin: 0 }}>섞인 단어 맞추기</p>
             </div>
           </Link>
-          <Link href="/play?mode=random" style={{ textDecoration: 'none', gridColumn: '2 / 4' }}>
+          <Link href="/play?mode=random" style={{ textDecoration: 'none', gridColumn: '1 / 3' }}>
             <div className="mode-card mode-random" style={{ height: 160, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', gap: '0.4rem' }}>
               <div style={{ fontSize: '2.2rem' }}>🎲</div>
               <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#a855f7', margin: 0 }}>랜덤 퀴즈</h3>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', margin: 0 }}>전체 무작위 출제</p>
             </div>
           </Link>
-          <Link href="/play?mode=survival" style={{ textDecoration: 'none', gridColumn: '4 / 6' }}>
+          <Link href="/play?mode=image" style={{ textDecoration: 'none', gridColumn: '3 / 5' }}>
+            <div className="mode-card mode-image" style={{ height: 160, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', gap: '0.4rem' }}>
+              <div style={{ fontSize: '2.2rem' }}>🖼️</div>
+              <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#00d4ff', margin: 0 }}>이미지 퀴즈</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', margin: 0 }}>사진 보고 맞추기</p>
+            </div>
+          </Link>
+          <Link href="/play?mode=survival" style={{ textDecoration: 'none', gridColumn: '5 / 7' }}>
             <div className="mode-card mode-survival" style={{ height: 160, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', gap: '0.4rem' }}>
               <div style={{ fontSize: '2.2rem' }}>💀</div>
               <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#ef4444', margin: 0 }}>서바이벌</h3>

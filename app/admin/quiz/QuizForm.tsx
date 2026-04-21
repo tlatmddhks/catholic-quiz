@@ -2,13 +2,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-type QuizMode = 'ox' | 'chosung' | 'normal';
+type QuizMode = 'ox' | 'chosung' | 'normal' | 'image';
 
 interface QuizData {
   id?: number; area?: string; lv?: number; pt?: number; type?: number;
   question?: string; right_word?: string; wrong_word?: string; explain_word?: string;
   ox?: string; shuffle?: string; survival_yn?: string; normal?: string;
-  is_visible?: string; is_test?: string;
+  is_visible?: string; is_test?: string; image_url?: string;
 }
 
 const inputStyle: React.CSSProperties = {
@@ -24,6 +24,7 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
   const isEdit = !!initial?.id;
 
   const detectMode = (): QuizMode => {
+    if (initial?.image_url) return 'image';
     if (initial?.shuffle === 'Y') return 'chosung';
     if (initial?.ox === 'Y') return 'ox';
     return 'normal';
@@ -43,9 +44,11 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
     survival_yn: initial?.survival_yn === 'Y',
     is_visible: initial?.is_visible === 'Y',
     is_test: initial?.is_test === 'Y',
+    image_url: initial?.image_url || '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [uploading, setUploading] = useState(false);
   const [areas, setAreas] = useState<number[]>([]);
 
   useEffect(() => {
@@ -57,6 +60,19 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
 
   const set = (key: string, value: any) => setForm(f => ({ ...f, [key]: value }));
 
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const fd = new FormData();
+    fd.append('file', file);
+    const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (res.ok) set('image_url', data.url);
+    else setError(data.error || '업로드 실패');
+    setUploading(false);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.question.trim() || !form.right_word.trim()) {
@@ -64,7 +80,7 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
     }
     setLoading(true); setError('');
 
-    const wrong_word = mode === 'normal'
+    const wrong_word = mode === 'normal' || mode === 'image'
       ? [form.wrong1, form.wrong2, form.wrong3].filter(Boolean).join('/')
       : mode === 'chosung' ? form.wrong1.replace(/\//g, '').split('').filter(Boolean).join('/') : '';
 
@@ -80,6 +96,7 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
       normal: mode === 'normal' ? 'Y' : 'N',
       is_visible: form.is_visible ? 'Y' : 'N',
       is_test: form.is_test ? 'Y' : 'N',
+      image_url: mode === 'image' ? (form.image_url || null) : null,
     };
 
     const url = isEdit ? `/api/admin/quiz/${initial!.id}` : '/api/admin/quiz';
@@ -103,7 +120,7 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
       {/* 퀴즈 유형 탭 */}
       {!isEdit && (
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
-          {([['ox','OX 퀴즈'],['chosung','셔플 퀴즈'],['normal','일반 퀴즈']] as [QuizMode,string][]).map(([v,l]) => (
+          {([['ox','OX 퀴즈'],['chosung','셔플 퀴즈'],['normal','일반 퀴즈'],['image','이미지 퀴즈']] as [QuizMode,string][]).map(([v,l]) => (
             <button key={v} type="button" onClick={() => setMode(v)}
               className={mode === v ? 'btn-primary' : 'btn-secondary'}
               style={{ padding: '0.5rem 1.2rem', fontSize: '0.875rem' }}>
@@ -163,7 +180,7 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
         </div>
       )}
 
-      {mode === 'normal' && (
+      {(mode === 'normal' || mode === 'image') && (
         <div style={{ marginBottom: '1rem' }}>
           <label style={labelStyle}>오답 (최대 3개)</label>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
@@ -171,6 +188,21 @@ export default function QuizForm({ initial }: { initial?: QuizData }) {
               <input key={k} style={inputStyle} value={form[k]} onChange={e => set(k, e.target.value)} placeholder={`오답 ${i+1}`} />
             ))}
           </div>
+        </div>
+      )}
+
+      {mode === 'image' && (
+        <div style={{ marginBottom: '1rem' }}>
+          <label style={labelStyle}>이미지 업로드</label>
+          <input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading}
+            style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text)', fontSize: '0.875rem' }} />
+          {uploading && <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>업로드 중...</span>}
+          {form.image_url && (
+            <div style={{ marginTop: '0.5rem' }}>
+              <img src={form.image_url} alt="preview" style={{ maxWidth: 240, maxHeight: 160, borderRadius: 8, border: '1px solid var(--border)' }} />
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>{form.image_url}</div>
+            </div>
+          )}
         </div>
       )}
 
