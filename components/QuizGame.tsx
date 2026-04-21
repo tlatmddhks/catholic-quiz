@@ -260,18 +260,16 @@ export default function QuizGame() {
       </div>
 
       {/* 문제 카드 */}
-      <div key={currentIdx} className="game-card anim-fade-up" style={{ padding: '2rem', marginBottom: '1.5rem' }}>
+      <div key={currentIdx} className="game-card anim-fade-up" style={{ padding: '2rem', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: currentQ.image_url ? 'center' : 'flex-start' }}>
         {currentQ.image_url && (
-          <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-            <img
-              src={currentQ.image_url}
-              alt="quiz"
-              style={{ maxWidth: '100%', maxHeight: 280, borderRadius: 12, objectFit: 'contain' }}
-            />
-          </div>
+          <img
+            src={currentQ.image_url}
+            alt="quiz"
+            style={{ maxWidth: '100%', maxHeight: 300, borderRadius: 12, objectFit: 'contain', marginBottom: currentQ.question ? '1rem' : 0 }}
+          />
         )}
         {currentQ.question && (
-          <p style={{ fontSize: '1.15rem', fontWeight: 600, lineHeight: 1.8, color: 'var(--text)', whiteSpace: 'pre-wrap', textAlign: currentQ.image_url ? 'center' : 'left' }}>
+          <p style={{ fontSize: '1.15rem', fontWeight: 600, lineHeight: 1.8, color: 'var(--text)', whiteSpace: 'pre-wrap', textAlign: currentQ.image_url ? 'center' : 'left', margin: 0 }}>
             {currentQ.question}
           </p>
         )}
